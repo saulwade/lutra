@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="640" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F2E7"/>
+      <stop offset="1" stop-color="#F2ECDE"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-opacity="0.10"/>
+    </filter>
+
+    <style>
+      .line {
+        stroke: #3F67D7;
+        stroke-width: 10;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+      .fill {
+        fill: #F9F6EE;
+        stroke: #3F67D7;
+        stroke-width: 10;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .softFill {
+        fill: #EFE7D7;
+      }
+
+      #mascot {
+        animation: bob 3.4s ease-in-out infinite;
+        transform-origin: 50% 62%;
+      }
+      #tail {
+        animation: tailwag 2.6s ease-in-out infinite;
+        transform-origin: 445px 470px;
+      }
+      #steam1, #steam2, #steam3 {
+        animation: steam 2.5s ease-in-out infinite;
+        opacity: 0;
+      }
+      #steam2 { animation-delay: .45s; }
+      #steam3 { animation-delay: .9s; }
+
+      #blinkL, #blinkR {
+        animation: blink 5.8s infinite;
+        transform-origin: center;
+      }
+
+      @keyframes bob {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+
+      @keyframes tailwag {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(3deg); }
+        75% { transform: rotate(-3deg); }
+      }
+
+      @keyframes steam {
+        0%   { transform: translateY(8px); opacity: 0; }
+        20%  { opacity: .7; }
+        100% { transform: translateY(-24px); opacity: 0; }
+      }
+
+      @keyframes blink {
+        0%, 46%, 50%, 100% { transform: scaleY(1); opacity: 1; }
+        48% { transform: scaleY(0.1); opacity: .85; }
+      }
+    </style>
+  </defs>
+
+  <rect x="20" y="20" width="600" height="600" rx="64" fill="url(#bg)"/>
+
+  <g id="mascot" filter="url(#shadow)">
+    <!-- tail behind -->
+    <g id="tail">
+      <path class="fill" d="M414 472
+                            C468 470, 523 477, 555 500
+                            C566 508, 567 524, 554 530
+                            C515 548, 448 540, 405 520
+                            C391 513, 390 486, 414 472Z"/>
+      <path class="line" d="M424 493 C470 492, 518 500, 544 517"/>
+    </g>
+
+    <!-- legs -->
+    <path class="fill" d="M250 492 C233 520, 220 549, 218 575
+                           C234 580, 263 573, 278 558
+                           C279 535, 278 512, 276 492Z"/>
+    <path class="fill" d="M315 492 C300 521, 292 547, 291 573
+                           C307 579, 333 571, 347 556
+                           C347 534, 345 511, 342 492Z"/>
+    <path class="line" d="M232 567 C243 558, 254 553, 268 551"/>
+    <path class="line" d="M302 565 C313 557, 325 552, 339 551"/>
+
+    <!-- torso -->
+    <path class="fill" d="M212 204
+                           C213 168, 240 142, 281 140
+                           L332 140
+                           C378 142, 406 167, 408 207
+                           L414 470
+                           C414 490, 398 506, 377 506
+                           L242 506
+                           C222 506, 206 490, 206 470
+                           Z"/>
+
+    <!-- belly -->
+    <path class="softFill" d="M243 244
+                              C250 219, 271 206, 301 206
+                              C337 206, 363 222, 370 251
+                              L377 438
+                              C378 454, 366 467, 350 467
+                              L270 467
+                              C254 467, 242 455, 243 439Z"/>
+
+    <!-- head -->
+    <path class="fill" d="M238 114
+                           C242 76, 273 52, 317 52
+                           C357 52, 389 72, 398 106
+                           C403 126, 400 147, 389 163
+                           C376 182, 355 193, 327 195
+                           L289 195
+                           C265 194, 245 185, 231 169
+                           C217 153, 214 134, 219 117
+                           C223 103, 230 94, 238 114Z"/>
+
+    <!-- ears -->
+    <path class="fill" d="M250 86 C242 67, 250 50, 269 45 C285 53, 287 71, 278 86Z"/>
+    <path class="fill" d="M355 83 C348 63, 357 49, 376 47 C391 56, 392 73, 383 87Z"/>
+
+    <!-- face -->
+    <circle cx="285" cy="122" r="7" fill="#3F67D7"/>
+    <circle cx="350" cy="121" r="7" fill="#3F67D7"/>
+
+    <!-- blink overlays -->
+    <g id="blinkL">
+      <path d="M276 122 C282 118, 288 118, 294 122" class="line" style="stroke-width:6"/>
+    </g>
+    <g id="blinkR">
+      <path d="M341 121 C347 117, 353 117, 359 121" class="line" style="stroke-width:6"/>
+    </g>
+
+    <path d="M311 132 C319 127, 328 127, 336 132 C330 145, 317 146, 311 132Z" fill="#3F67D7"/>
+    <path d="M323 145 C318 156, 308 163, 295 165" class="line" style="stroke-width:7"/>
+    <path d="M323 145 C328 156, 338 163, 351 165" class="line" style="stroke-width:7"/>
+
+    <!-- whiskers -->
+    <path d="M300 142 C272 137, 251 136, 227 139" class="line" style="stroke-width:6"/>
+    <path d="M299 152 C271 153, 249 156, 226 164" class="line" style="stroke-width:6"/>
+    <path d="M346 142 C374 137, 395 136, 419 141" class="line" style="stroke-width:6"/>
+    <path d="M347 152 C374 154, 396 159, 417 167" class="line" style="stroke-width:6"/>
+
+    <!-- sweater collar -->
+    <path class="fill" d="M240 193 L377 193 L377 243 C377 255, 368 264, 355 264 L262 264 C249 264, 240 255, 240 243Z"/>
+    <path class="line" d="M262 194 L262 260"/>
+    <path class="line" d="M286 194 L286 260"/>
+    <path class="line" d="M310 194 L310 260"/>
+    <path class="line" d="M334 194 L334 260"/>
+    <path class="line" d="M358 194 L358 260"/>
+
+    <!-- sweater hem -->
+    <path class="fill" d="M225 441 L396 441 L396 488 C396 498, 388 506, 378 506 L243 506 C233 506, 225 498, 225 488Z"/>
+    <path class="line" d="M248 441 L248 505"/>
+    <path class="line" d="M273 441 L273 505"/>
+    <path class="line" d="M298 441 L298 505"/>
+    <path class="line" d="M323 441 L323 505"/>
+    <path class="line" d="M348 441 L348 505"/>
+    <path class="line" d="M373 441 L373 505"/>
+
+    <!-- arm behind mug -->
+    <path class="line" d="M357 318 C382 315, 402 321, 419 336"/>
+
+    <!-- mug -->
+    <g>
+      <rect x="150" y="270" width="78" height="98" rx="14" class="fill"/>
+      <path d="M228 293 C247 293, 258 306, 258 321 C258 337, 246 350, 228 350" class="line"/>
+    </g>
+
+    <!-- front arm -->
+    <path class="fill" d="M261 303
+                           C248 299, 234 303, 224 314
+                           C221 334, 231 350, 246 355
+                           C266 362, 284 353, 293 338
+                           L308 312
+                           C299 305, 281 298, 261 303Z"/>
+    <path class="line" d="M266 320 C255 329, 250 340, 251 352"/>
+
+    <!-- steam -->
+    <path id="steam1" d="M182 252 C171 239, 177 227, 187 214 C196 203, 197 190, 187 178" class="line" style="stroke-width:7; opacity:.65"/>
+    <path id="steam2" d="M202 245 C194 232, 199 221, 207 210 C215 199, 216 186, 208 176" class="line" style="stroke-width:7; opacity:.65"/>
+    <path id="steam3" d="M221 252 C214 239, 220 227, 229 216 C237 205, 238 193, 230 183" class="line" style="stroke-width:7; opacity:.65"/>
+  </g>
+</svg>

@@ -1,0 +1,211 @@
+[
+  {
+    "name": "Verduras",
+    "slug": "verduras",
+    "description": "Verduras y hortalizas. Un equivalente aporta macros mínimos.",
+    "kcalPerEquivalent": 25,
+    "proteinGPerEquivalent": 2,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 4,
+    "color": "#22c55e",
+    "order": 1
+  },
+  {
+    "name": "Frutas",
+    "slug": "frutas",
+    "description": "Frutas frescas o en conserva sin azúcar.",
+    "kcalPerEquivalent": 60,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 15,
+    "color": "#f97316",
+    "order": 2
+  },
+  {
+    "name": "Cereales S/G",
+    "slug": "cereales-sin-grasa",
+    "description": "Cereales y tubérculos sin grasa agregada.",
+    "kcalPerEquivalent": 70,
+    "proteinGPerEquivalent": 2,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 15,
+    "color": "#eab308",
+    "order": 3
+  },
+  {
+    "name": "Cereales C/G",
+    "slug": "cereales-con-grasa",
+    "description": "Cereales y tubérculos con grasa (tortilla frita, etc.).",
+    "kcalPerEquivalent": 115,
+    "proteinGPerEquivalent": 2,
+    "fatGPerEquivalent": 4,
+    "carbsGPerEquivalent": 15,
+    "color": "#ca8a04",
+    "order": 4
+  },
+  {
+    "name": "Leguminosas",
+    "slug": "leguminosas",
+    "description": "Frijoles, lentejas, garbanzo, soya y otras leguminosas.",
+    "kcalPerEquivalent": 120,
+    "proteinGPerEquivalent": 8,
+    "fatGPerEquivalent": 1,
+    "carbsGPerEquivalent": 20,
+    "color": "#a16207",
+    "order": 5
+  },
+  {
+    "name": "AOA MBAG",
+    "slug": "aoa-muy-bajo-grasa",
+    "description": "Alimentos de Origen Animal – Muy Bajo Aporte de Grasa.",
+    "kcalPerEquivalent": 40,
+    "proteinGPerEquivalent": 7,
+    "fatGPerEquivalent": 1,
+    "carbsGPerEquivalent": 0,
+    "color": "#3b82f6",
+    "order": 6
+  },
+  {
+    "name": "AOA BAG",
+    "slug": "aoa-bajo-grasa",
+    "description": "Alimentos de Origen Animal – Bajo Aporte de Grasa.",
+    "kcalPerEquivalent": 55,
+    "proteinGPerEquivalent": 7,
+    "fatGPerEquivalent": 3,
+    "carbsGPerEquivalent": 0,
+    "color": "#2563eb",
+    "order": 7
+  },
+  {
+    "name": "AOA MAG",
+    "slug": "aoa-moderado-grasa",
+    "description": "Alimentos de Origen Animal – Moderado Aporte de Grasa.",
+    "kcalPerEquivalent": 75,
+    "proteinGPerEquivalent": 7,
+    "fatGPerEquivalent": 5,
+    "carbsGPerEquivalent": 0,
+    "color": "#1d4ed8",
+    "order": 8
+  },
+  {
+    "name": "AOA AAG",
+    "slug": "aoa-alto-grasa",
+    "description": "Alimentos de Origen Animal – Alto Aporte de Grasa.",
+    "kcalPerEquivalent": 100,
+    "proteinGPerEquivalent": 7,
+    "fatGPerEquivalent": 8,
+    "carbsGPerEquivalent": 0,
+    "color": "#1e40af",
+    "order": 9
+  },
+  {
+    "name": "Leche descremada",
+    "slug": "leche-descremada",
+    "description": "Leche y productos lácteos descremados.",
+    "kcalPerEquivalent": 95,
+    "proteinGPerEquivalent": 9,
+    "fatGPerEquivalent": 2,
+    "carbsGPerEquivalent": 12,
+    "color": "#e0f2fe",
+    "order": 10
+  },
+  {
+    "name": "Leche semidescremada",
+    "slug": "leche-semidescremada",
+    "description": "Leche y productos lácteos semidescremados.",
+    "kcalPerEquivalent": 110,
+    "proteinGPerEquivalent": 9,
+    "fatGPerEquivalent": 4,
+    "carbsGPerEquivalent": 12,
+    "color": "#bae6fd",
+    "order": 11
+  },
+  {
+    "name": "Leche entera",
+    "slug": "leche-entera",
+    "description": "Leche y productos lácteos enteros.",
+    "kcalPerEquivalent": 150,
+    "proteinGPerEquivalent": 9,
+    "fatGPerEquivalent": 8,
+    "carbsGPerEquivalent": 12,
+    "color": "#7dd3fc",
+    "order": 12
+  },
+  {
+    "name": "Leche con azúcar",
+    "slug": "leche-con-azucar",
+    "description": "Leche y productos lácteos con azúcar agregada.",
+    "kcalPerEquivalent": 200,
+    "proteinGPerEquivalent": 8,
+    "fatGPerEquivalent": 5,
+    "carbsGPerEquivalent": 30,
+    "color": "#38bdf8",
+    "order": 13
+  },
+  {
+    "name": "Grasas sin proteínas",
+    "slug": "grasas-sin-proteinas",
+    "description": "Aceites, mantequillas, cremas y otras grasas puras.",
+    "kcalPerEquivalent": 45,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 5,
+    "carbsGPerEquivalent": 0,
+    "color": "#fbbf24",
+    "order": 14
+  },
+  {
+    "name": "Grasas con proteínas",
+    "slug": "grasas-con-proteinas",
+    "description": "Aguacate, nueces, semillas y otras grasas con proteína.",
+    "kcalPerEquivalent": 70,
+    "proteinGPerEquivalent": 3,
+    "fatGPerEquivalent": 5,
+    "carbsGPerEquivalent": 3,
+    "color": "#f59e0b",
+    "order": 15
+  },
+  {
+    "name": "Azucares sin grasa",
+    "slug": "azucares-sin-grasa",
+    "description": "Azúcares simples y bebidas azucaradas sin grasa.",
+    "kcalPerEquivalent": 40,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 10,
+    "color": "#f43f5e",
+    "order": 16
+  },
+  {
+    "name": "Azucares con grasa",
+    "slug": "azucares-con-grasa",
+    "description": "Dulces y postres con grasa (chocolates, pasteles, etc.).",
+    "kcalPerEquivalent": 85,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 4,
+    "carbsGPerEquivalent": 10,
+    "color": "#e11d48",
+    "order": 17
+  },
+  {
+    "name": "Alcohol",
+    "slug": "alcohol",
+    "description": "Bebidas alcohólicas.",
+    "kcalPerEquivalent": 90,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 5,
+    "color": "#7c3aed",
+    "order": 18
+  },
+  {
+    "name": "Libres en energía",
+    "slug": "libres-energia",
+    "description": "Alimentos con aporte calórico mínimo (< 25 kcal por porción).",
+    "kcalPerEquivalent": 0,
+    "proteinGPerEquivalent": 0,
+    "fatGPerEquivalent": 0,
+    "carbsGPerEquivalent": 0,
+    "color": "#6b7280",
+    "order": 19
+  }
+]

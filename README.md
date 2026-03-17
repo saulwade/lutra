@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nutrivon
 
-## Getting Started
+SaaS para nutriólogos — gestión de pacientes, cálculo energético, planes SMAE y exportación PDF.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** + **React 19** + **Tailwind CSS v4**
+- **Convex** (backend serverless + realtime DB)
+- **Clerk** (autenticación)
+- **Vercel** (hosting)
+
+## Inicio rápido
+
+### 1. Instalar dependencias
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.local.example .env.local
+# Edita .env.local con tus claves de Clerk y Convex
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Inicializar Convex
 
-## Learn More
+```bash
+npx convex dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Esto genera `convex/_generated/` con tipos reales y reemplaza los stubs.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Sembrar la base SMAE
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run smae:normalize   # Normaliza el JSON raw
+npm run smae:seed        # Carga 2,870 alimentos a Convex
+```
 
-## Deploy on Vercel
+### 5. Correr en desarrollo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Terminal 1
+npx convex dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Terminal 2
+npm run dev
+```
+
+Abre http://localhost:3000
+
+## Scripts
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run convex:dev` | Backend Convex |
+| `npm run smae:normalize` | Normaliza SMAE JSON |
+| `npm run smae:seed` | Carga SMAE a Convex |
+
+## Estructura
+
+```
+convex/          Backend (queries, mutations, schema)
+src/app/         Next.js App Router
+src/components/  UI components (shadcn + layout)
+src/features/    Feature modules (patients, plans, foods, recipes)
+src/lib/         Utils, schemas, nutrition calculator
+src/hooks/       React hooks
+src/data/        SMAE normalizado (JSON)
+src/scripts/     Scripts de normalización y seed
+docs/            Documentación del proyecto
+```
+
+## Notas importantes
+
+- Los archivos `convex/_generated/*.ts` son **stubs** hasta correr `npx convex dev`
+- La base SMAE incluye 2,870 alimentos del Sistema Mexicano de Alimentos Equivalentes
+- El motor de cálculo usa Mifflin-St Jeor por defecto (configurable por paciente)
+- El middleware de Clerk protege todas las rutas excepto `/`, `/login`, `/signup`

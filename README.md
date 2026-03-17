@@ -1,4 +1,4 @@
-# Nutrivon
+# Lutra
 
 SaaS para nutriólogos — gestión de pacientes, cálculo energético, planes SMAE y exportación PDF.
 

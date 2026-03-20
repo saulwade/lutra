@@ -116,9 +116,9 @@ const QUICK_ACTIONS = [
 export default function DashboardPage() {
   const { user } = useUser();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const patients = useQuery(api.patients.getPatients, isAuthenticated ? {} : "skip");
-  const recipes  = useQuery(api.recipes.getRecipes,  isAuthenticated ? {} : "skip");
-  const plans    = useQuery(api.plans.getPlans,       isAuthenticated ? {} : "skip");
+  const patients = useQuery(api.patients.getPatients,   isAuthenticated ? {} : "skip");
+  const recipes  = useQuery(api.recipes.getRecipes,    isAuthenticated ? {} : "skip");
+  const plans    = useQuery(api.plans.getRecentPlans,  isAuthenticated ? { limit: 4 } : "skip");
 
   const isLoading = authLoading || patients === undefined;
 

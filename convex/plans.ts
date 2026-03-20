@@ -311,6 +311,19 @@ export const duplicatePlan = mutation({
 });
 
 // ─── GET TEMPLATES ────────────────────────────────────────────────────────────
+export const getRecentPlans = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const nutritionist = await getAuthenticatedNutritionist(ctx);
+    const all = await ctx.db
+      .query("plans")
+      .withIndex("by_nutritionist", (q: any) => q.eq("nutritionistId", nutritionist._id))
+      .order("desc")
+      .take(args.limit ?? 5);
+    return all;
+  },
+});
+
 export const getTemplates = query({
   args: {},
   handler: async (ctx) => {

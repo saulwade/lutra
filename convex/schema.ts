@@ -200,7 +200,7 @@ export default defineSchema({
     .index("by_patient", ["patientId"])
     .index("by_patient_date", ["patientId", "date"]),
 
-  // ─── CONSULTATIONS (visit notes) ─────────────────────────────────
+  // ─── CONSULTATIONS (visit notes + follow-up) ─────────────────────
   consultations: defineTable({
     patientId: v.id("patients"),
     nutritionistId: v.id("nutritionists"),
@@ -208,12 +208,49 @@ export default defineSchema({
     reason: v.optional(v.string()),        // motivo de consulta
     notes: v.optional(v.string()),         // notas clínicas
     weightKg: v.optional(v.number()),      // peso en consulta
+    bodyFatPct: v.optional(v.number()),    // % grasa corporal
+    muscleMassKg: v.optional(v.number()),  // masa muscular kg
+    waistCm: v.optional(v.number()),       // cintura cm
     bloodPressure: v.optional(v.string()), // "120/80"
+    // Seguimiento cualitativo
+    adherenceScore: v.optional(v.number()),      // 1–5: qué tanto siguió el plan
+    feelingScore: v.optional(v.number()),         // 1–5: cómo se siente
+    seesPhysicalChanges: v.optional(v.boolean()),
+    seesMentalChanges: v.optional(v.boolean()),
     nextAppointment: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_patient", ["patientId"])
     .index("by_patient_date", ["patientId", "date"]),
+
+  // ─── CLINICAL HISTORY (one per patient) ──────────────────────────
+  clinicalHistory: defineTable({
+    patientId: v.id("patients"),
+    nutritionistId: v.id("nutritionists"),
+    // Antecedentes
+    personalPathological: v.optional(v.string()),   // Diabetes, HTA, etc.
+    familyHistory: v.optional(v.string()),           // Heredofamiliares
+    personalNonPathological: v.optional(v.string()), // Ocupación, escolaridad
+    substances: v.optional(v.string()),              // Toxicomanías
+    alcoholUse: v.optional(v.string()),              // Consumo de alcohol
+    // Hábitos alimentarios
+    physicalActivity: v.optional(v.string()),
+    mealsPerDay: v.optional(v.number()),
+    eatsOutFrequency: v.optional(v.string()),        // "nunca"|"1-2x/sem"|"3-4x/sem"|"diario"
+    foodPreparator: v.optional(v.string()),          // quién prepara alimentos
+    foodRelationship: v.optional(v.string()),        // relación con la comida
+    // Otros hábitos
+    sleepHours: v.optional(v.number()),
+    sleepQuality: v.optional(v.string()),            // "buena"|"regular"|"mala"
+    supplements: v.optional(v.string()),
+    // Gustos y restricciones
+    foodLikes: v.optional(v.string()),
+    foodDislikes: v.optional(v.string()),
+    allergiesDetail: v.optional(v.string()),         // descripción ampliada
+    commitmentLevel: v.optional(v.string()),         // percepción inicial
+    updatedAt: v.number(),
+  })
+    .index("by_patient", ["patientId"]),
 
   // ─── FOOD DATABASE (SMAE) ─────────────────────────────────────────
   foods: defineTable({

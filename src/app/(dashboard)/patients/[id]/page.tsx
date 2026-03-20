@@ -49,6 +49,8 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { HistoriaClinicaTab } from "@/features/patients/historia-clinica-tab";
+import { SeguimientoTab } from "@/features/patients/seguimiento-tab";
 
 const COMMON_ALLERGIES = [
   "Lactosa", "Gluten", "Mariscos", "Frutos secos", "Cacahuate",
@@ -344,8 +346,21 @@ export default function PatientDetailPage({
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="mb-4">
+      <Tabs defaultValue="seguimiento" className="w-full">
+        <TabsList className="mb-4 flex-wrap h-auto gap-1">
+          <TabsTrigger value="seguimiento" className="flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Seguimiento
+            {consultations && consultations.length > 0 && (
+              <span className="ml-1 text-xs bg-[hsl(var(--muted))] px-1.5 rounded-full">
+                {consultations.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="historia" className="flex items-center gap-1.5">
+            <Stethoscope className="w-3.5 h-3.5" />
+            Historia Clínica
+          </TabsTrigger>
           <TabsTrigger value="profile" className="flex items-center gap-1.5">
             <User className="w-3.5 h-3.5" />
             Perfil
@@ -359,25 +374,17 @@ export default function PatientDetailPage({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5" />
-            Mediciones
-            {measurements && measurements.length > 0 && (
-              <span className="ml-1 text-xs bg-[hsl(var(--muted))] px-1.5 rounded-full">
-                {measurements.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="consultations" className="flex items-center gap-1.5">
-            <Stethoscope className="w-3.5 h-3.5" />
-            Consultas
-            {consultations && consultations.length > 0 && (
-              <span className="ml-1 text-xs bg-[hsl(var(--muted))] px-1.5 rounded-full">
-                {consultations.length}
-              </span>
-            )}
-          </TabsTrigger>
         </TabsList>
+
+        {/* Seguimiento Tab */}
+        <TabsContent value="seguimiento">
+          <SeguimientoTab patientId={patientId} patientWeightKg={patient.weightKg} />
+        </TabsContent>
+
+        {/* Historia Clínica Tab */}
+        <TabsContent value="historia">
+          <HistoriaClinicaTab patientId={patientId} />
+        </TabsContent>
 
         {/* Profile Tab */}
         <TabsContent value="profile">
@@ -597,7 +604,7 @@ export default function PatientDetailPage({
           )}
         </TabsContent>
 
-        {/* History Tab — Measurements */}
+        {/* Legacy: hidden, replaced by SeguimientoTab */}
         <TabsContent value="history">
           <div className="flex flex-col gap-4">
 
@@ -702,8 +709,8 @@ export default function PatientDetailPage({
           </div>
         </TabsContent>
 
-        {/* Consultations Tab */}
-        <TabsContent value="consultations">
+        {/* Legacy: hidden, replaced by SeguimientoTab */}
+        <TabsContent value="consultations_legacy">
           <div className="flex flex-col gap-4">
             {/* Add consultation form */}
             <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5">

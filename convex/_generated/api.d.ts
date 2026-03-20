@@ -9,6 +9,7 @@
  */
 
 import type * as ai from "../ai.js";
+import type * as clinicalHistory from "../clinicalHistory.js";
 import type * as consultations from "../consultations.js";
 import type * as foods from "../foods.js";
 import type * as meals from "../meals.js";
@@ -26,6 +27,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
+  clinicalHistory: typeof clinicalHistory;
   consultations: typeof consultations;
   foods: typeof foods;
   meals: typeof meals;

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import {
   Users,
   ClipboardList,
@@ -173,8 +175,8 @@ const FAQS = [
     a: "No necesitas instalar nada. Lutra es 100% web y funciona en cualquier navegador desde tu computadora, tablet o celular. Puedes crear tu cuenta sin tarjeta de crédito.",
   },
   {
-    q: "¿Cuál es la diferencia entre el plan Básico y el plan Pro con IA?",
-    a: "El plan Básico incluye todo lo que necesitas para gestionar pacientes, crear planes y trabajar con la base SMAE. El plan Pro agrega un asistente de IA que te ayuda a generar ideas de recetas, sugerir ajustes de plan y analizar deficiencias nutricionales de forma automática. Aún más velocidad, aún menos trabajo manual.",
+    q: "¿Qué incluye el plan de $499 MXN al mes?",
+    a: "Todo: gestión ilimitada de pacientes, planes alimenticios con base SMAE completa, recetas con cálculo automático de macros, calculadora energética, historial de cada paciente y asistente de IA para generar planes. No hay funciones bloqueadas ni niveles de suscripción. Un precio, todo incluido.",
   },
   {
     q: "¿Puedo usar Lutra desde el celular o tableta?",
@@ -188,7 +190,10 @@ const FAQS = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+  if (userId) redirect("/dashboard");
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-[hsl(222,47%,11%)]">
 
@@ -582,89 +587,65 @@ export default function LandingPage() {
                 Precios
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                Invierte menos de lo que cobras en una consulta
+                Un solo plan. Todo incluido.
               </h2>
               <p className="text-[hsl(215,16%,47%)] text-lg max-w-xl mx-auto">
-                Sin contratos. Sin sorpresas. Cancela cuando quieras.
+                Sin niveles. Sin funciones bloqueadas. Sin sorpresas.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-              {/* Plan Básico */}
-              <div className="bg-white rounded-2xl border border-[hsl(214,32%,91%)] p-8 flex flex-col gap-6">
+            <div className="max-w-md mx-auto">
+              <div className="relative bg-[hsl(222,47%,11%)] rounded-2xl p-8 flex flex-col gap-6 overflow-hidden">
+                <div className="absolute top-5 right-5">
+                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-[hsl(81,10%,54%)] text-white px-2.5 py-1 rounded-full">
+                    <Sparkles className="w-3 h-3" />
+                    Todo incluido
+                  </span>
+                </div>
+
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(215,16%,47%)] mb-2">Plan Básico</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-2">Plan Lutra</p>
                   <div className="flex items-end gap-1 mb-1">
-                    <span className="text-4xl font-extrabold">$349</span>
-                    <span className="text-[hsl(215,16%,47%)] mb-1.5">MXN / mes</span>
+                    <span className="text-5xl font-extrabold text-white">$499</span>
+                    <span className="text-white/50 mb-2">MXN / mes</span>
                   </div>
-                  <p className="text-sm text-[hsl(215,16%,47%)]">
-                    Para nutriólogos que quieren ordenar su práctica y crear planes más rápido.
+                  <p className="text-sm text-white/60">
+                    Todo lo que necesitas para operar tu práctica nutricional, sin pagar de más.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-2.5">
                   {BASIC_FEATURES.map((f) => (
                     <div key={f} className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-[hsl(81,10%,54%)] shrink-0 mt-0.5" />
-                      <span className="text-sm">{f}</span>
+                      <Check className="w-4 h-4 text-[hsl(81,10%,60%)] shrink-0 mt-0.5" />
+                      <span className="text-sm text-white">{f}</span>
                     </div>
                   ))}
-                </div>
-
-                <Button
-                  asChild
-                  variant="outline"
-                  className="mt-auto border-[hsl(81,10%,54%)] text-[hsl(81,10%,54%)] hover:bg-[hsl(81,10%,94%)]"
-                >
-                  <Link href="/signup">Empezar con Básico</Link>
-                </Button>
-              </div>
-
-              {/* Plan Pro */}
-              <div className="relative bg-[hsl(222,47%,11%)] rounded-2xl p-8 flex flex-col gap-6 overflow-hidden">
-                <div className="absolute top-5 right-5">
-                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-[hsl(81,10%,54%)] text-white px-2.5 py-1 rounded-full">
-                    <Sparkles className="w-3 h-3" />
-                    Recomendado
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-2">Plan Pro con IA</p>
-                  <div className="flex items-end gap-1 mb-1">
-                    <span className="text-4xl font-extrabold text-white">$549</span>
-                    <span className="text-white/50 mb-1.5">MXN / mes</span>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[hsl(81,10%,60%)] shrink-0 mt-0.5" />
+                    <span className="text-sm text-white">Asistente IA para generar planes alimenticios</span>
                   </div>
-                  <p className="text-sm text-white/60">
-                    Para nutriólogos que quieren ahorrar aún más tiempo y automatizar parte de su trabajo.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2.5">
-                  {PRO_EXTRAS.map((f, i) => (
-                    <div key={f} className="flex items-start gap-2.5">
-                      <Check className={cn("w-4 h-4 shrink-0 mt-0.5", i === 0 ? "text-white/40" : "text-[hsl(81,10%,60%)]")} />
-                      <span className={cn("text-sm", i === 0 ? "text-white/50" : "text-white")}>{f}</span>
-                    </div>
-                  ))}
                 </div>
 
                 <Button
                   asChild
-                  className="mt-auto bg-[hsl(81,10%,54%)] text-white hover:bg-[hsl(81,10%,44%)]"
+                  className="mt-2 bg-[hsl(81,10%,54%)] text-white hover:bg-[hsl(81,10%,44%)] h-12 text-base font-semibold"
                 >
                   <Link href="/signup">
-                    Empezar con Pro
+                    Empezar ahora
                     <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Link>
                 </Button>
+
+                <div className="flex justify-center gap-6 text-xs text-white/40">
+                  <span>Sin contrato</span>
+                  <span>·</span>
+                  <span>Cancela cuando quieras</span>
+                  <span>·</span>
+                  <span>Sin tarjeta para explorar</span>
+                </div>
               </div>
             </div>
-
-            <p className="text-center text-sm text-[hsl(215,16%,47%)] mt-8">
-              ¿Dudas antes de suscribirte? Empieza gratis y explora la plataforma sin compromiso.
-            </p>
           </div>
         </section>
 

@@ -620,7 +620,7 @@ export default async function LandingPage() {
 
                 <Button
                   asChild
-                  className="mt-2 bg-[#0C5E8A] text-white hover:bg-[#0a4d72] h-12 text-base font-semibold"
+                  className="mt-2 bg-[#0C5E8A] text-white hover:bg-[#757D6A] h-12 text-base font-semibold"
                 >
                   <Link href="/signup">
                     Empezar ahora

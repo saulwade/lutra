@@ -247,7 +247,7 @@ export default function SettingsPage() {
               type="submit"
               disabled={isSubmitting || !isDirty}
               className={cn(
-                "bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]",
+                "bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A]",
                 !isDirty && "opacity-50"
               )}
             >

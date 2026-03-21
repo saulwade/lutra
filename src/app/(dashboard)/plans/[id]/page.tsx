@@ -565,7 +565,7 @@ export default function PlanDetailPage({
             size="sm"
             onClick={handleDownloadPDF}
             disabled={downloadingPdf}
-            className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] flex-1 sm:flex-none"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] flex-1 sm:flex-none"
           >
             {downloadingPdf
               ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -706,7 +706,7 @@ export default function PlanDetailPage({
                     size="sm"
                     onClick={handleSaveEquivs}
                     disabled={savingEquivs}
-                    className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-7 text-xs"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-7 text-xs"
                   >
                     {savingEquivs && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                     Guardar cambios
@@ -830,7 +830,7 @@ export default function PlanDetailPage({
                     size="sm"
                     onClick={handleSaveDist}
                     disabled={savingDist}
-                    className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-7 text-xs"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-7 text-xs"
                   >
                     {savingDist && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                     Guardar
@@ -976,7 +976,7 @@ export default function PlanDetailPage({
               size="sm"
               onClick={handleSaveNotes}
               disabled={savingNotes}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-8"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-8"
             >
               {savingNotes && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               Guardar notas
@@ -1042,7 +1042,7 @@ export default function PlanDetailPage({
                 size="sm"
                 onClick={() => handleAddMeal(customMealName)}
                 disabled={!customMealName.trim()}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-8"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-8"
               >
                 Agregar
               </Button>
@@ -1484,7 +1484,7 @@ function FoodSearchTab({ onAddFood }: { onAddFood: (food: any, qty: number) => P
         size="sm"
         disabled={qty <= 0 || adding}
         onClick={handleAdd}
-        className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-8 self-end"
+        className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-8 self-end"
       >
         {adding && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
         Agregar al plan
@@ -1591,7 +1591,7 @@ function RecipeTab({ onAddRecipe }: { onAddRecipe: (recipe: any, servings: numbe
         size="sm"
         disabled={servings <= 0 || adding}
         onClick={handleAdd}
-        className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] h-8 self-end"
+        className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-8 self-end"
       >
         {adding && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
         Agregar al plan

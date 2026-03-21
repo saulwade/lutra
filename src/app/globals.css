@@ -45,7 +45,7 @@
     --surface-hover: 36 12% 95%;    /* very subtle warm-neutral hover */
     --table-header: 36 12% 93%;
     --text-strong: 20 25% 8%;       /* near-black — titles */
-    --cta: 203 84% 29%;             /* primary blue #0C5E8A */
+    --cta: 81 10% 54%;              /* olive #8D957E */
 
     /* ─── Sidebar ───────────────────────────────────────────── */
     --sidebar-background: 0 0% 100%;
@@ -100,7 +100,7 @@
     --surface-hover: 25 10% 18%;
     --table-header: 25 12% 20%;
     --text-strong: 34 25% 94%;
-    --cta: 201 42% 60%;             /* dark mode primary blue */
+    --cta: 81 10% 64%;              /* dark mode olive */
   }
 }
 

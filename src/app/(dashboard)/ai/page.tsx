@@ -734,7 +734,7 @@ export default function AIPlanPage() {
             </Button>
             <Button
               onClick={() => setStep("recall")}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] gap-1.5"
             >
               Siguiente →
             </Button>
@@ -857,7 +857,7 @@ export default function AIPlanPage() {
             <Button variant="outline" onClick={() => setStep("setup")}>← Ajustar configuración</Button>
             <Button
               onClick={handleGenerate}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
               Generar plan
@@ -1060,7 +1060,7 @@ export default function AIPlanPage() {
             <Button
               onClick={handleSave}
               disabled={saving || !planTitle.trim() || regenerating}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] gap-1.5"
             >
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Guardar plan

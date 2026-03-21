@@ -257,7 +257,7 @@ export default function PatientsPage() {
           </Button>
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] w-fit"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] w-fit"
           >
             <Plus className="w-4 h-4 mr-1" />
             Nuevo Paciente
@@ -297,7 +297,7 @@ export default function PatientsPage() {
               <Button
                 size="sm"
                 onClick={() => setDialogOpen(true)}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] mt-2"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] mt-2"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Agregar paciente
@@ -638,7 +638,7 @@ export default function PatientsPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A]"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Registrar paciente
@@ -908,7 +908,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleParse}
                 disabled={!rawText.trim()}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A]"
               >
                 Continuar →
               </Button>
@@ -972,7 +972,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleValidate}
                 disabled={!mapping["name"] || !mapping["sex"] || !mapping["heightCm"] || !mapping["weightKg"]}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A]"
               >
                 Validar datos →
               </Button>
@@ -1037,7 +1037,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleImport}
                 disabled={validRows.length === 0 || importing}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A]"
               >
                 {importing && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Importar {validRows.length} paciente{validRows.length !== 1 ? "s" : ""}

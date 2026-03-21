@@ -172,7 +172,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-col gap-2 shrink-0">
                 <Button asChild size="sm"
-                  className="bg-[#0C5E8A] text-white hover:bg-[#0a4d72] h-9 px-4 text-xs gap-1.5 font-semibold">
+                  className="bg-[hsl(var(--cta))] text-white hover:bg-[#757D6A] h-9 px-4 text-xs gap-1.5 font-semibold">
                   <Link href="/patients">
                     <Plus className="w-3.5 h-3.5" />
                     Paciente

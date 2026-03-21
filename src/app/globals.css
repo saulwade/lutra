@@ -12,12 +12,12 @@
     /* #788990 slate       */  --slate-ui: 198 10% 52%;
 
     /* ─── Surface tokens ────────────────────────────────────── */
-    --background: 45 28% 90%;       /* warm cream — pairs with olive/sand accents */
-    --foreground: 20 15% 18%;       /* warm dark — readable on cream */
+    --background: 36 24% 96%;       /* #F7F5F2 — clean near-white, not yellow beige */
+    --foreground: 20 20% 12%;       /* near-black — stronger contrast on light bg */
     --card: 0 0% 100%;
-    --card-foreground: 20 15% 18%;
+    --card-foreground: 20 20% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 15% 18%;
+    --popover-foreground: 20 20% 12%;
 
     /* ─── Interactive ───────────────────────────────────────── */
     --primary-foreground: 0 0% 100%;
@@ -25,8 +25,8 @@
     --secondary-foreground: 85 20% 24%;
 
     /* ─── Neutral tones ─────────────────────────────────────── */
-    --muted: 34 20% 89%;            /* warm beige — hover states */
-    --muted-foreground: 198 10% 46%;
+    --muted: 36 12% 92%;            /* very light — hover states on near-white bg */
+    --muted-foreground: 203 15% 44%; /* blue-slate — cleaner than warm slate */
     --accent: 203 40% 93%;          /* very light blue tint — highlight areas */
     --accent-foreground: 203 84% 22%;
 
@@ -35,24 +35,24 @@
     --destructive-foreground: 0 0% 98%;
 
     /* ─── Structure ─────────────────────────────────────────── */
-    --border: 34 18% 84%;           /* warm border */
-    --input: 34 18% 84%;
+    --border: 38 16% 90%;           /* #EAE7E2 — soft, clean border */
+    --input: 38 16% 90%;
     --ring: 203 84% 29%;
     --radius: 0.625rem;
 
     /* ─── Design tokens (visual hierarchy) ──────────────────── */
     --surface: 0 0% 100%;
-    --surface-hover: 34 20% 95%;
-    --table-header: 34 28% 82%;
-    --text-strong: 20 25% 10%;
-    --cta: 21 76% 34%;              /* terracotta — primary CTA button */
+    --surface-hover: 36 12% 95%;    /* very subtle warm-neutral hover */
+    --table-header: 36 12% 93%;
+    --text-strong: 20 25% 8%;       /* near-black — titles */
+    --cta: 21 76% 34%;              /* terracotta — kept for legacy uses */
 
     /* ─── Sidebar ───────────────────────────────────────────── */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 20 15% 18%;
+    --sidebar-foreground: 20 20% 12%;
     --sidebar-primary: 203 84% 29%;
-    --sidebar-accent: 203 40% 93%;  /* light blue hover */
-    --sidebar-border: 34 14% 88%;
+    --sidebar-accent: 203 40% 93%;
+    --sidebar-border: 38 16% 90%;
   }
 
   /* ─── Dark mode ─────────────────────────────────────────────────────────── */

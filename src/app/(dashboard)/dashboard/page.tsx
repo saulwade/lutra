@@ -29,6 +29,10 @@ const GOAL_LABELS: Record<string, string> = {
   health:      "Salud general",
 };
 
+// ─── Icon system — strictly on brand palette ──────────────────────────────
+// bg: color/10-15 opacity  •  icon: solid brand color
+// Primary blue #0C5E8A, Secondary blue #5D9CBD, Olive #798C5E, Sand #DAC297
+
 // Alta prioridad — cards verticales grandes
 const PRIMARY_ACTIONS = [
   {
@@ -36,8 +40,8 @@ const PRIMARY_ACTIONS = [
     description: "Registra datos clínicos y antropometría",
     href:        "/patients",
     icon:        Users,
-    iconBg:      "bg-orange-100 dark:bg-orange-950/40",
-    iconColor:   "text-orange-500",
+    iconBg:      "bg-[#0C5E8A]/10 dark:bg-[#0C5E8A]/15",
+    iconColor:   "text-[#0C5E8A] dark:text-[#5D9CBD]",
   },
   {
     label:       "Plan con IA",
@@ -56,29 +60,29 @@ const SECONDARY_ACTIONS = [
     label:     "Calculadora",
     href:      "/calc",
     icon:      Calculator,
-    iconBg:    "bg-slate-100 dark:bg-slate-800/50",
-    iconColor: "text-slate-500",
+    iconBg:    "bg-[#798C5E]/10 dark:bg-[#798C5E]/15",
+    iconColor: "text-[#798C5E] dark:text-[#B0C09A]",
   },
   {
     label:     "Crear plan",
     href:      "/plans",
     icon:      ClipboardList,
-    iconBg:    "bg-blue-100 dark:bg-blue-950/30",
-    iconColor: "text-blue-500",
+    iconBg:    "bg-[#5D9CBD]/12 dark:bg-[#5D9CBD]/18",
+    iconColor: "text-[#5D9CBD] dark:text-[#5D9CBD]",
   },
   {
     label:     "Alimentos",
     href:      "/foods",
     icon:      Apple,
-    iconBg:    "bg-emerald-100 dark:bg-emerald-950/30",
-    iconColor: "text-emerald-500",
+    iconBg:    "bg-[#798C5E]/10 dark:bg-[#798C5E]/15",
+    iconColor: "text-[#798C5E] dark:text-[#B0C09A]",
   },
   {
     label:     "Recetas",
     href:      "/recipes",
     icon:      ChefHat,
-    iconBg:    "bg-amber-100 dark:bg-amber-950/30",
-    iconColor: "text-amber-500",
+    iconBg:    "bg-[#DAC297]/25 dark:bg-[#DAC297]/12",
+    iconColor: "text-[#7a5c28] dark:text-[#DAC297]",
   },
 ] as const;
 
@@ -134,14 +138,14 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-col gap-2 shrink-0">
                 <Button asChild size="sm"
-                  className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-9 px-4 text-xs gap-1.5 font-semibold">
+                  className="bg-[#0C5E8A] text-white hover:bg-[#0a4d72] h-9 px-4 text-xs gap-1.5 font-semibold">
                   <Link href="/patients">
                     <Plus className="w-3.5 h-3.5" />
                     Paciente
                   </Link>
                 </Button>
                 <Button asChild size="sm" variant="outline"
-                  className="h-9 px-4 text-xs gap-1.5 border-[hsl(var(--primary)/0.35)] text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] font-semibold">
+                  className="h-9 px-4 text-xs gap-1.5 border-[#0C5E8A]/30 text-[#0C5E8A] hover:bg-[#0C5E8A]/8 font-semibold dark:border-[#5D9CBD]/40 dark:text-[#5D9CBD]">
                   <Link href="/ai">
                     <Sparkles className="w-3.5 h-3.5" />
                     Plan IA
@@ -184,7 +188,7 @@ export default function DashboardPage() {
               ].map(({ n, title, desc, href }) => (
                 <Link key={n} href={href}
                   className="flex items-center gap-3 py-3 hover:bg-[hsl(var(--muted))] -mx-1 px-1 rounded-lg transition-colors group first:pt-0 last:pb-0">
-                  <div className="w-6 h-6 rounded-full bg-[hsl(var(--cta))] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-[#0C5E8A] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                     {n}
                   </div>
                   <div className="flex-1 min-w-0">

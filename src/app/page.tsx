@@ -45,43 +45,43 @@ const BENEFITS = [
     icon: Clock,
     title: "Recupera horas cada semana",
     desc: "Lo que hoy te toma 2 horas, con Lutra lo tienes en 20 minutos. Cálculos automáticos, base SMAE lista, sin trabajo repetitivo.",
-    color: "text-[hsl(81,10%,54%)]",
-    bg: "bg-[hsl(81,10%,94%)]",
+    color: "text-[#0C5E8A]",
+    bg: "bg-[#0C5E8A]/10",
   },
   {
     icon: Layers,
     title: "Todo en un solo lugar",
     desc: "Pacientes, planes, recetas, cálculos y seguimiento. Sin Excel, sin Word, sin PDFs por separado. Un sistema, todo integrado.",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-[#5D9CBD]",
+    bg: "bg-[#5D9CBD]/10",
   },
   {
     icon: Star,
     title: "Entrega más profesional",
     desc: "Presenta planes limpios, claros y completos. Tus pacientes notarán la diferencia y tu práctica ganará credibilidad.",
-    color: "text-purple-600",
-    bg: "bg-purple-50",
+    color: "text-[#798C5E]",
+    bg: "bg-[#798C5E]/10",
   },
   {
     icon: Zap,
     title: "Base SMAE completamente integrada",
     desc: "Más de 2,870 alimentos con calorías, macros y micronutrientes listos. Busca, filtra y agrega a cualquier plan en segundos.",
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-[#974315]",
+    bg: "bg-[#974315]/8",
   },
   {
     icon: BarChart3,
     title: "Análisis nutricional automático",
     desc: "Visualiza macros, micronutrientes y cumplimiento de objetivos sin hacer una sola suma. Los números se calculan solos.",
-    color: "text-teal-600",
-    bg: "bg-teal-50",
+    color: "text-[#3d4e2c]",
+    bg: "bg-[#B0C09A]/20",
   },
   {
     icon: Users,
     title: "Historial de cada paciente",
     desc: "Registra evolución, cambios de plan y notas. Ten todo el contexto disponible antes de cada consulta, sin buscar en papeles.",
-    color: "text-rose-600",
-    bg: "bg-rose-50",
+    color: "text-[#7a5c28]",
+    bg: "bg-[#DAC297]/20",
   },
 ];
 
@@ -152,15 +152,6 @@ const BASIC_FEATURES = [
   "Acceso desde cualquier dispositivo",
 ];
 
-const PRO_EXTRAS = [
-  "Todo lo del plan Básico",
-  "Asistente IA para generar ideas de recetas",
-  "Sugerencias inteligentes de ajuste de plan",
-  "Análisis automático de deficiencias nutricionales",
-  "Generación de notas de consulta con IA",
-  "Acceso anticipado a nuevas funciones IA",
-];
-
 const FAQS = [
   {
     q: "¿Está hecho específicamente para nutriólogos en México?",
@@ -218,10 +209,10 @@ export default async function LandingPage() {
       <main className="flex-1">
 
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[hsl(81,10%,97%)] via-white to-white pt-20 pb-16 sm:pt-28 sm:pb-24">
+        <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-white pt-20 pb-16 sm:pt-28 sm:pb-24">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[hsl(81,10%,54%)] opacity-[0.04] translate-x-1/3 -translate-y-1/3" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-[hsl(81,10%,54%)] opacity-[0.04] -translate-x-1/3 translate-y-1/3" />
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[#0C5E8A] opacity-[0.04] translate-x-1/3 -translate-y-1/3" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-[#0C5E8A] opacity-[0.04] -translate-x-1/3 translate-y-1/3" />
           </div>
 
           <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
@@ -232,7 +223,7 @@ export default async function LandingPage() {
 
                 <h1 className="text-3xl sm:text-4xl lg:text-[3.25rem] font-extrabold leading-[1.2] sm:leading-[1.15] tracking-tight mb-4 sm:mb-5">
                   Deja de armar planes en Excel.{" "}
-                  <span className="text-[hsl(81,10%,54%)]">Tu consulta merece herramientas reales.</span>
+                  <span className="text-[#0C5E8A]">Tu consulta merece herramientas reales.</span>
                 </h1>
 
                 <p className="text-base sm:text-lg text-[hsl(215,16%,47%)] leading-relaxed mb-7 sm:mb-8 max-w-xl mx-auto lg:mx-0">
@@ -245,15 +236,15 @@ export default async function LandingPage() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mt-4 sm:mt-5 text-sm text-[hsl(215,16%,47%)]">
                   <span className="flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-[hsl(81,10%,54%)]" />
+                    <Check className="w-4 h-4 text-[#0C5E8A]" />
                     Sin tarjeta de crédito
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-[hsl(81,10%,54%)]" />
+                    <Check className="w-4 h-4 text-[#0C5E8A]" />
                     Configuración en 2 minutos
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-[hsl(81,10%,54%)]" />
+                    <Check className="w-4 h-4 text-[#0C5E8A]" />
                     Base SMAE incluida
                   </span>
                 </div>
@@ -265,11 +256,11 @@ export default async function LandingPage() {
                   <div className="rounded-2xl border border-[hsl(214,32%,91%)] shadow-2xl shadow-black/10 overflow-hidden bg-white">
                     {/* Browser bar */}
                     <div className="flex items-center gap-1.5 px-4 py-3 bg-[hsl(214,32%,96%)] border-b border-[hsl(214,32%,91%)]">
-                      <div className="w-3 h-3 rounded-full bg-red-400" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                      <div className="w-3 h-3 rounded-full bg-green-400" />
+                      <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))]/60" />
+                      <div className="w-3 h-3 rounded-full bg-[#DAC297]" />
+                      <div className="w-3 h-3 rounded-full bg-[#798C5E]/70" />
                       <div className="flex-1 mx-4 bg-white rounded-md h-5 flex items-center px-2">
-                        <span className="text-[10px] text-[hsl(215,16%,60%)]">nutrivon.app/dashboard</span>
+                        <span className="text-[10px] text-[hsl(215,16%,60%)]">lutra.app/dashboard</span>
                       </div>
                     </div>
                     {/* Fake dashboard */}
@@ -290,7 +281,7 @@ export default async function LandingPage() {
                             key={label}
                             className={cn(
                               "flex items-center gap-2 px-2 py-2 rounded-lg",
-                              active ? "bg-[hsl(81,10%,54%)] text-white" : "text-white/50"
+                              active ? "bg-[#0C5E8A] text-white" : "text-white/50"
                             )}
                           >
                             <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -305,15 +296,15 @@ export default async function LandingPage() {
                             <div className="h-3.5 w-28 bg-[hsl(222,47%,11%)] rounded" />
                             <div className="h-2.5 w-20 bg-[hsl(215,16%,75%)] rounded" />
                           </div>
-                          <div className="w-20 h-7 rounded-lg bg-[hsl(81,10%,54%)]" />
+                          <div className="w-20 h-7 rounded-lg bg-[#0C5E8A]" />
                         </div>
                         {/* Macro cards */}
                         <div className="grid grid-cols-4 gap-2 mb-3">
                           {[
                             { label: "Kcal", val: "1,850", color: "text-[hsl(222,47%,11%)]" },
-                            { label: "Prot", val: "98g", color: "text-blue-600" },
-                            { label: "Lip", val: "62g", color: "text-yellow-600" },
-                            { label: "HC", val: "210g", color: "text-[hsl(81,10%,54%)]" },
+                            { label: "Prot", val: "98g",   color: "text-[#0C5E8A]" },
+                            { label: "Lip",  val: "62g",   color: "text-[#7a5c28]" },
+                            { label: "HC",   val: "210g",  color: "text-[#798C5E]" },
                           ].map((m) => (
                             <div key={m.label} className="bg-white rounded-lg p-2 text-center border border-[hsl(214,32%,91%)]">
                               <p className={cn("text-xs font-bold", m.color)}>{m.val}</p>
@@ -335,7 +326,7 @@ export default async function LandingPage() {
                               <div className="flex items-center gap-2">
                                 <div className="w-14 h-1.5 bg-[hsl(214,32%,91%)] rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-[hsl(81,10%,54%)] rounded-full"
+                                    className="h-full bg-[#0C5E8A] rounded-full"
                                     style={{ width: `${[70, 45, 85, 60][i]}%` }}
                                   />
                                 </div>
@@ -348,7 +339,7 @@ export default async function LandingPage() {
                     </div>
                   </div>
                   {/* Glow */}
-                  <div className="absolute -inset-4 bg-[hsl(81,10%,54%)] opacity-[0.06] rounded-3xl blur-3xl -z-10" />
+                  <div className="absolute -inset-4 bg-[#0C5E8A] opacity-[0.06] rounded-3xl blur-3xl -z-10" />
                 </div>
               </div>
             </div>
@@ -361,8 +352,8 @@ export default async function LandingPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
               {TRUST_BADGES.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-[hsl(81,10%,54%)]" />
+                  <div className="w-8 h-8 rounded-lg bg-[#0C5E8A]/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-[#0C5E8A]" />
                   </div>
                   <span className="text-sm font-medium">{text}</span>
                 </div>
@@ -386,8 +377,8 @@ export default async function LandingPage() {
                 <div className="flex flex-col gap-3">
                   {PAIN_POINTS.map((p) => (
                     <div key={p} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
-                        <X className="w-3 h-3 text-red-500" />
+                      <div className="w-5 h-5 rounded-full bg-[#974315]/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <X className="w-3 h-3 text-[#974315]" />
                       </div>
                       <span className="text-[hsl(215,16%,47%)] text-sm leading-relaxed">{p}</span>
                     </div>
@@ -396,8 +387,8 @@ export default async function LandingPage() {
               </div>
 
               {/* After */}
-              <div className="bg-[hsl(81,10%,97%)] rounded-2xl p-8 border border-[hsl(81,10%,88%)]">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+              <div className="bg-[hsl(214,32%,97%)] rounded-2xl p-8 border border-[hsl(214,32%,91%)]">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                   Con Lutra
                 </p>
                 <h3 className="text-2xl font-bold mb-6">
@@ -413,7 +404,7 @@ export default async function LandingPage() {
                     "Historial completo de cada paciente, siempre disponible",
                   ].map((p) => (
                     <div key={p} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[hsl(81,10%,54%)] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-[#0C5E8A] flex items-center justify-center shrink-0 mt-0.5">
                         <Check className="w-3 h-3 text-white" />
                       </div>
                       <span className="text-sm leading-relaxed font-medium">{p}</span>
@@ -429,7 +420,7 @@ export default async function LandingPage() {
         <section className="py-20 sm:py-28 bg-[hsl(214,32%,98%)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                 Beneficios
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -463,7 +454,7 @@ export default async function LandingPage() {
         <section id="como-funciona" className="py-20 sm:py-28 bg-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                 Así funciona
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -478,10 +469,10 @@ export default async function LandingPage() {
               {STEPS.map(({ n, title, desc }, i) => (
                 <div key={n} className="relative flex flex-col gap-4">
                   {i < STEPS.length - 1 && (
-                    <div className="hidden lg:block absolute top-6 left-full w-full h-px bg-gradient-to-r from-[hsl(81,10%,54%)] to-transparent -translate-x-4 z-0" />
+                    <div className="hidden lg:block absolute top-6 left-full w-full h-px bg-gradient-to-r from-[#0C5E8A] to-transparent -translate-x-4 z-0" />
                   )}
-                  <div className="relative z-10 w-12 h-12 rounded-2xl bg-[hsl(81,10%,92%)] flex items-center justify-center">
-                    <span className="text-sm font-extrabold text-[hsl(81,10%,54%)]">{n}</span>
+                  <div className="relative z-10 w-12 h-12 rounded-2xl bg-[#0C5E8A]/10 flex items-center justify-center">
+                    <span className="text-sm font-extrabold text-[#0C5E8A]">{n}</span>
                   </div>
                   <div>
                     <h3 className="text-base font-semibold mb-2">{title}</h3>
@@ -497,7 +488,7 @@ export default async function LandingPage() {
         <section id="funciones" className="py-20 sm:py-28 bg-[hsl(222,47%,11%)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,60%)] mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#B0C09A] mb-3">
                 Funciones
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
@@ -514,7 +505,7 @@ export default async function LandingPage() {
                   key={title}
                   className="rounded-2xl border border-white/10 p-6 bg-white/5 hover:bg-white/8 transition-colors flex gap-4"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[hsl(81,10%,54%)] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#0C5E8A] flex items-center justify-center shrink-0">
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -532,7 +523,7 @@ export default async function LandingPage() {
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                   Por qué Lutra
                 </p>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-5">
@@ -548,7 +539,7 @@ export default async function LandingPage() {
                     { title: "Escalable con IA", desc: "El plan Pro ya incluye funciones de IA. Pronto mucho más automatización para tu flujo de consulta." },
                   ].map(({ title, desc }) => (
                     <div key={title} className="flex gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[hsl(81,10%,54%)] mt-2 shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#0C5E8A] mt-2 shrink-0" />
                       <div>
                         <p className="font-semibold text-sm mb-0.5">{title}</p>
                         <p className="text-sm text-[hsl(215,16%,47%)]">{desc}</p>
@@ -567,9 +558,9 @@ export default async function LandingPage() {
                 ].map(({ val, label, sub }) => (
                   <div
                     key={label}
-                    className="bg-[hsl(81,10%,97%)] rounded-2xl p-5 border border-[hsl(81,10%,88%)]"
+                    className="bg-[hsl(214,32%,97%)] rounded-2xl p-5 border border-[hsl(214,32%,91%)]"
                   >
-                    <p className="text-3xl font-extrabold text-[hsl(81,10%,54%)] mb-1">{val}</p>
+                    <p className="text-3xl font-extrabold text-[#0C5E8A] mb-1">{val}</p>
                     <p className="text-sm font-semibold">{label}</p>
                     <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">{sub}</p>
                   </div>
@@ -583,7 +574,7 @@ export default async function LandingPage() {
         <section id="precios" className="py-20 sm:py-28 bg-[hsl(214,32%,98%)]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                 Precios
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -597,7 +588,7 @@ export default async function LandingPage() {
             <div className="max-w-md mx-auto">
               <div className="relative bg-[hsl(222,47%,11%)] rounded-2xl p-8 flex flex-col gap-6 overflow-hidden">
                 <div className="absolute top-5 right-5">
-                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-[hsl(81,10%,54%)] text-white px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-[#0C5E8A] text-white px-2.5 py-1 rounded-full">
                     <Sparkles className="w-3 h-3" />
                     Todo incluido
                   </span>
@@ -617,19 +608,19 @@ export default async function LandingPage() {
                 <div className="flex flex-col gap-2.5">
                   {BASIC_FEATURES.map((f) => (
                     <div key={f} className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-[hsl(81,10%,60%)] shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#B0C09A] shrink-0 mt-0.5" />
                       <span className="text-sm text-white">{f}</span>
                     </div>
                   ))}
                   <div className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-[hsl(81,10%,60%)] shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-[#B0C09A] shrink-0 mt-0.5" />
                     <span className="text-sm text-white">Asistente IA para generar planes alimenticios</span>
                   </div>
                 </div>
 
                 <Button
                   asChild
-                  className="mt-2 bg-[hsl(81,10%,54%)] text-white hover:bg-[hsl(81,10%,44%)] h-12 text-base font-semibold"
+                  className="mt-2 bg-[#0C5E8A] text-white hover:bg-[#0a4d72] h-12 text-base font-semibold"
                 >
                   <Link href="/signup">
                     Empezar ahora
@@ -653,7 +644,7 @@ export default async function LandingPage() {
         <section className="py-20 sm:py-28 bg-white">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(81,10%,54%)] mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#0C5E8A] mb-3">
                 Preguntas frecuentes
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold">
@@ -678,7 +669,7 @@ export default async function LandingPage() {
         </section>
 
         {/* ── Final CTA ── */}
-        <section className="py-20 sm:py-28 bg-[hsl(81,10%,54%)]">
+        <section className="py-20 sm:py-28 bg-[#0C5E8A]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
               Tu práctica merece herramientas a la altura de tu formación.
@@ -690,7 +681,7 @@ export default async function LandingPage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-[hsl(81,10%,54%)] hover:bg-white/90 h-12 px-10 text-base font-semibold shadow-lg"
+                className="bg-white text-[#0C5E8A] hover:bg-white/90 h-12 px-10 text-base font-semibold shadow-lg"
               >
                 <Link href="/signup">
                   Crear cuenta gratuita
@@ -724,11 +715,11 @@ export default async function LandingPage() {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-5 text-xs text-[hsl(215,16%,47%)]">
-              <a href="#precios" className="hover:text-[hsl(81,10%,54%)] transition-colors">Precios</a>
-              <Link href="/terminos" className="hover:text-[hsl(81,10%,54%)] transition-colors">Términos de uso</Link>
-              <Link href="/privacidad" className="hover:text-[hsl(81,10%,54%)] transition-colors">Privacidad</Link>
-              <Link href="/login" className="hover:text-[hsl(81,10%,54%)] transition-colors">Iniciar sesión</Link>
-              <Link href="/signup" className="hover:text-[hsl(81,10%,54%)] transition-colors">Registrarse</Link>
+              <a href="#precios" className="hover:text-[#0C5E8A] transition-colors">Precios</a>
+              <Link href="/terminos" className="hover:text-[#0C5E8A] transition-colors">Términos de uso</Link>
+              <Link href="/privacidad" className="hover:text-[#0C5E8A] transition-colors">Privacidad</Link>
+              <Link href="/login" className="hover:text-[#0C5E8A] transition-colors">Iniciar sesión</Link>
+              <Link href="/signup" className="hover:text-[#0C5E8A] transition-colors">Registrarse</Link>
             </div>
           </div>
         </div>

@@ -92,7 +92,7 @@ export function RecipeCard({ recipe, onSelect }: RecipeCardProps) {
                   <DropdownMenuItem
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="text-red-600"
+                    className="text-[hsl(var(--destructive))]"
                   >
                     <Trash2 className="w-4 h-4 mr-2" /> Eliminar
                   </DropdownMenuItem>
@@ -123,21 +123,21 @@ export function RecipeCard({ recipe, onSelect }: RecipeCardProps) {
           <div className="grid grid-cols-4 gap-1 pt-1">
             <div className="text-center">
               <div className="font-semibold text-sm flex items-center justify-center gap-0.5">
-                <Flame className="w-3 h-3 text-orange-500" />
+                <Flame className="w-3 h-3 text-[hsl(var(--muted-foreground))]" />
                 {Math.round(recipe.caloriesPerServing)}
               </div>
               <div className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>kcal</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-sm text-blue-600">{recipe.proteinGPerServing.toFixed(1)}g</div>
+              <div className="font-semibold text-sm text-[#0C5E8A] dark:text-[#5D9CBD]">{recipe.proteinGPerServing.toFixed(1)}g</div>
               <div className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>prot</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-sm text-yellow-600">{recipe.fatGPerServing.toFixed(1)}g</div>
+              <div className="font-semibold text-sm text-[#7a5c28] dark:text-[#DAC297]">{recipe.fatGPerServing.toFixed(1)}g</div>
               <div className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>gras</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-sm" style={{ color: "hsl(var(--primary))" }}>{recipe.carbsGPerServing.toFixed(1)}g</div>
+              <div className="font-semibold text-sm text-[#798C5E] dark:text-[#B0C09A]">{recipe.carbsGPerServing.toFixed(1)}g</div>
               <div className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>carbs</div>
             </div>
           </div>

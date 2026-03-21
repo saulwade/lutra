@@ -239,12 +239,12 @@ export function calculateBMI(weightKg: number, heightCm: number): number {
 }
 
 export function getBMICategory(bmi: number): { label: string; color: string } {
-  if (bmi < 18.5) return { label: "Bajo peso", color: "text-blue-600" };
-  if (bmi < 25) return { label: "Peso normal", color: "text-green-600" };
-  if (bmi < 30) return { label: "Sobrepeso", color: "text-yellow-600" };
-  if (bmi < 35) return { label: "Obesidad I", color: "text-orange-600" };
-  if (bmi < 40) return { label: "Obesidad II", color: "text-red-600" };
-  return { label: "Obesidad III", color: "text-red-800" };
+  if (bmi < 18.5) return { label: "Bajo peso",   color: "text-[#5D9CBD]" };
+  if (bmi < 25)   return { label: "Peso normal",  color: "text-[#798C5E]" };
+  if (bmi < 30)   return { label: "Sobrepeso",    color: "text-[#7a5c28]" };
+  if (bmi < 35)   return { label: "Obesidad I",   color: "text-[#974315]" };
+  if (bmi < 40)   return { label: "Obesidad II",  color: "text-[#974315]" };
+  return           { label: "Obesidad III", color: "text-[hsl(var(--destructive))]" };
 }
 
 // ─── SMAE Equivalents Calculator ─────────────────────────────────────────────

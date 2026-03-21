@@ -34,7 +34,7 @@ export function Sidebar() {
 
       {/* Logo / Brand */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-[hsl(var(--sidebar-border))]">
-        <div className="w-9 h-9 rounded-xl bg-[hsl(var(--warm-cream))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
+        <div className="w-9 h-9 rounded-xl bg-[hsl(var(--accent))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
           <img src="/lutra-logo.svg" alt="Lutra" className="w-6 h-6" />
         </div>
         <div className="flex flex-col leading-none">
@@ -54,19 +54,19 @@ export function Sidebar() {
               className={cn(
                 "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
                 isActive
-                  ? "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] font-semibold"
+                  ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-semibold"
                   : highlight
                     ? "text-[hsl(var(--primary))] hover:bg-[hsl(var(--sidebar-accent))]"
-                    : "text-[hsl(20,10%,40%)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--foreground))]"
+                    : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--foreground))]"
               )}
             >
               {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[hsl(var(--terracotta))] rounded-r-full" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[hsl(var(--primary))] rounded-r-full" />
               )}
               <Icon
                 className={cn(
                   "w-4 h-4 shrink-0",
-                  isActive ? "text-[hsl(var(--terracotta))]"
+                  isActive ? "text-[hsl(var(--primary))]"
                     : highlight ? "text-[hsl(var(--primary))]"
                     : "text-[hsl(var(--muted-foreground))]"
                 )}

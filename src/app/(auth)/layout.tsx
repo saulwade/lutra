@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[hsl(81,10%,54%)] via-[hsl(81,10%,28%)] to-[hsl(81,10%,20%)]">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0C5E8A] via-[#0a4d72] to-[#073a56]">
       {/* Subtle background dots pattern */}
       <div
         className="absolute inset-0 opacity-10"

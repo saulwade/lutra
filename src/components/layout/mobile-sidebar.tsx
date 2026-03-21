@@ -90,9 +90,9 @@ export function MobileSidebar() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors min-h-[48px]",
                   isActive
-                    ? "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] font-semibold"
+                    ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-semibold"
                     : highlight
-                    ? "text-[hsl(var(--terracotta))] hover:bg-[hsl(var(--warm-cream))/0.5]"
+                    ? "text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))]"
                     : "text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--foreground))]"
                 )}
               >
@@ -100,15 +100,15 @@ export function MobileSidebar() {
                   className={cn(
                     "w-5 h-5 shrink-0",
                     isActive
-                      ? "text-[hsl(var(--terracotta))]"
+                      ? "text-[hsl(var(--primary))]"
                       : highlight
-                      ? "text-[hsl(var(--terracotta))]"
+                      ? "text-[hsl(var(--primary))]"
                       : "text-[hsl(var(--muted-foreground))]"
                   )}
                 />
                 {label}
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[hsl(var(--terracotta))]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))]" />
                 )}
               </Link>
             );

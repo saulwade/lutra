@@ -204,23 +204,23 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
             Requerimiento diario
           </h2>
           <div className="grid grid-cols-4 gap-4 text-center">
-            <MacroPill label="" value={plan.targetCalories} unit="kcal" color="text-orange-500" />
-            <MacroPill label="proteína" value={plan.targetProteinG} unit="g" color="text-blue-600" />
-            <MacroPill label="grasa" value={plan.targetFatG} unit="g" color="text-yellow-600" />
-            <MacroPill label="carbs" value={plan.targetCarbsG} unit="g" color="text-green-600" />
+            <MacroPill label="" value={plan.targetCalories} unit="kcal" color="text-[hsl(var(--foreground))]" />
+            <MacroPill label="proteína" value={plan.targetProteinG} unit="g" color="text-[#0C5E8A]" />
+            <MacroPill label="grasa" value={plan.targetFatG} unit="g" color="text-[#7a5c28]" />
+            <MacroPill label="carbs" value={plan.targetCarbsG} unit="g" color="text-[#798C5E]" />
           </div>
           {/* Macro bar */}
           <div className="mt-4 flex rounded-full overflow-hidden h-2">
             <div
-              className="bg-blue-500 transition-all"
+              className="bg-[#0C5E8A] transition-all"
               style={{ width: `${plan.targetProteinPct}%` }}
             />
             <div
-              className="bg-yellow-400 transition-all"
+              className="bg-[#b8925a] transition-all"
               style={{ width: `${plan.targetFatPct}%` }}
             />
             <div
-              className="bg-green-500 transition-all"
+              className="bg-[#798C5E] transition-all"
               style={{ width: `${plan.targetCarbsPct}%` }}
             />
           </div>
@@ -254,7 +254,7 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
                     )}
                   </div>
                   {meal.totalCalories !== undefined && (
-                    <span className="text-xs font-medium text-orange-500">
+                    <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">
                       {Math.round(meal.totalCalories)} kcal
                     </span>
                   )}
@@ -280,13 +280,13 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
                         <span className="col-span-2 text-right" style={{ color: "hsl(var(--muted-foreground))" }}>
                           {food.quantity} {food.unit}
                         </span>
-                        <span className="col-span-1 text-right text-orange-600 text-xs">
+                        <span className="col-span-1 text-right text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                           {Math.round(food.calories)}
                         </span>
-                        <span className="col-span-1 text-right text-blue-600 text-xs">
+                        <span className="col-span-1 text-right text-[#0C5E8A] text-xs">
                           {food.proteinG.toFixed(1)}
                         </span>
-                        <span className="col-span-1 text-right text-yellow-600 text-xs">
+                        <span className="col-span-1 text-right text-[#7a5c28] text-xs">
                           {food.fatG.toFixed(1)}
                         </span>
                         <span className="col-span-2 text-right text-xs" style={{ color: "hsl(var(--primary))" }}>
@@ -299,9 +299,9 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
                       <div className="grid grid-cols-12 text-xs font-semibold pt-1" style={{ color: "hsl(var(--muted-foreground))" }}>
                         <span className="col-span-5">Total</span>
                         <span className="col-span-2" />
-                        <span className="col-span-1 text-right text-orange-600">{Math.round(meal.totalCalories)}</span>
-                        <span className="col-span-1 text-right text-blue-600">{(meal.totalProteinG || 0).toFixed(1)}</span>
-                        <span className="col-span-1 text-right text-yellow-600">{(meal.totalFatG || 0).toFixed(1)}</span>
+                        <span className="col-span-1 text-right text-[hsl(var(--muted-foreground))]">{Math.round(meal.totalCalories)}</span>
+                        <span className="col-span-1 text-right text-[#0C5E8A]">{(meal.totalProteinG || 0).toFixed(1)}</span>
+                        <span className="col-span-1 text-right text-[#7a5c28]">{(meal.totalFatG || 0).toFixed(1)}</span>
                         <span className="col-span-2 text-right" style={{ color: "hsl(var(--primary))" }}>{(meal.totalCarbsG || 0).toFixed(1)}g</span>
                       </div>
                     )}
@@ -329,10 +329,10 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
               Total del día
             </h3>
             <div className="grid grid-cols-4 gap-4 text-center">
-              <MacroPill label="" value={totalActualCalories} unit="kcal" color="text-orange-500" />
-              <MacroPill label="proteína" value={totalActualProtein} unit="g" color="text-blue-600" />
-              <MacroPill label="grasa" value={totalActualFat} unit="g" color="text-yellow-600" />
-              <MacroPill label="carbs" value={totalActualCarbs} unit="g" color="text-green-600" />
+              <MacroPill label="" value={totalActualCalories} unit="kcal" color="text-[hsl(var(--foreground))]" />
+              <MacroPill label="proteína" value={totalActualProtein} unit="g" color="text-[#0C5E8A]" />
+              <MacroPill label="grasa" value={totalActualFat} unit="g" color="text-[#7a5c28]" />
+              <MacroPill label="carbs" value={totalActualCarbs} unit="g" color="text-[#798C5E]" />
             </div>
           </div>
         )}

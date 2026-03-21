@@ -25,9 +25,9 @@ interface MacroRingProps {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const COLORS = {
-  protein: { stroke: "#3b82f6", bg: "bg-blue-500", text: "text-blue-600", label: "Proteínas" },
-  fat: { stroke: "#eab308", bg: "bg-yellow-400", text: "text-yellow-600", label: "Grasas" },
-  carbs: { stroke: "#22c55e", bg: "bg-green-500", text: "text-green-600", label: "Carbohidratos" },
+  protein: { stroke: "#0C5E8A", bg: "bg-[#0C5E8A]",  text: "text-[#0C5E8A] dark:text-[#5D9CBD]",    label: "Proteínas" },
+  fat:     { stroke: "#b8925a", bg: "bg-[#b8925a]",  text: "text-[#7a5c28] dark:text-[#DAC297]",    label: "Grasas" },
+  carbs:   { stroke: "#798C5E", bg: "bg-[#798C5E]",  text: "text-[#3d4e2c] dark:text-[#B0C09A]",   label: "Carbohidratos" },
 };
 
 // ─── SVG Donut ────────────────────────────────────────────────────────────────

@@ -50,7 +50,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
   active:   "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
-  draft:    "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] border border-[hsl(var(--border))]",
+  draft:    "bg-[#DAC297]/20 text-[#7a5c28] border border-[#DAC297]/40 dark:bg-[#DAC297]/12 dark:text-[#DAC297]",
   archived: "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))]",
 };
 

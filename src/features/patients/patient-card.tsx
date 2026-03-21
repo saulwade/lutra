@@ -57,20 +57,20 @@ function getInitials(name: string): string {
 
 const GOAL_BADGE_STYLES: Record<PatientCardData["goal"], string> = {
   weight_loss:
-    "bg-blue-50 text-blue-700 border-blue-200",
+    "bg-[#0C5E8A]/10 text-[#0C5E8A] border-[#0C5E8A]/20 dark:bg-[#0C5E8A]/15 dark:text-[#5D9CBD]",
   maintenance:
-    "bg-green-50 text-green-700 border-green-200",
+    "bg-[#798C5E]/10 text-[#3d4e2c] border-[#798C5E]/20 dark:bg-[#798C5E]/15 dark:text-[#B0C09A]",
   weight_gain:
-    "bg-orange-50 text-orange-700 border-orange-200",
+    "bg-[#DAC297]/30 text-[#7a5c28] border-[#DAC297]/40 dark:bg-[#DAC297]/12 dark:text-[#DAC297]",
   muscle_gain:
-    "bg-purple-50 text-purple-700 border-purple-200",
+    "bg-[#5D9CBD]/15 text-[#0C5E8A] border-[#5D9CBD]/20 dark:bg-[#5D9CBD]/15 dark:text-[#5D9CBD]",
   health:
-    "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] border-[hsl(var(--border))]",
+    "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border-[hsl(var(--border))]",
 };
 
 const SEX_AVATAR_COLORS: Record<PatientCardData["sex"], string> = {
-  female: "bg-pink-100 text-pink-700",
-  male: "bg-blue-100 text-blue-700",
+  female: "bg-[#5D9CBD]/15 text-[#0C5E8A] dark:bg-[#5D9CBD]/20 dark:text-[#5D9CBD]",
+  male:   "bg-[#0C5E8A]/10 text-[#0C5E8A] dark:bg-[#0C5E8A]/15 dark:text-[#5D9CBD]",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

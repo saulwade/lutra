@@ -11,13 +11,16 @@ import {
   Zap,
   PieChart,
   Layers,
-  ChevronDown,
-  ChevronUp,
   RefreshCw,
   ArrowRight,
-  Info,
   CheckCircle,
   AlertCircle,
+  Plus,
+  X,
+  Droplets,
+  ClipboardList,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +98,32 @@ const GOAL_LABELS: Record<string, string> = {
 
 const KCAL_KG_OPTIONS = [20, 25, 30, 35, 40];
 
+// ─── 24h recall food detection keywords ──────────────────────────────────────
+const RECALL_GROUPS: { pattern: RegExp; group: EquivKey; label: string }[] = [
+  { pattern: /huevo|blanquillo/i,                          group: "aoaMBAG",    label: "AOA M.B.G." },
+  { pattern: /pollo|pechuga|muslo|pierna/i,                group: "aoaMBAG",    label: "AOA M.B.G." },
+  { pattern: /atún|atun|sardina|salmon|salmón|pescado|tilapia|mojarra/i, group: "aoaMBAG", label: "AOA M.B.G." },
+  { pattern: /res|carne|bistec|milanesa|cerdo|puerco|carnitas/i, group: "aoaMAG",   label: "AOA M.A.G." },
+  { pattern: /chorizo|salchicha|tocino|embutido|mortadela/i, group: "aoaAAG",   label: "AOA A.A.G." },
+  { pattern: /leche|yogur|yakult/i,                        group: "lecheSemi",  label: "Lácteo" },
+  { pattern: /queso/i,                                     group: "grasaCP",    label: "Grasa C/P" },
+  { pattern: /frijol|lenteja|garbanzo|soya|haba|alubia/i,  group: "leguminosas",label: "Leguminosas" },
+  { pattern: /tortilla|taco|tostada|tlayuda|quesadilla/i,  group: "cerealSG",   label: "Cereales S/G" },
+  { pattern: /arroz|pasta|espagueti|macarron|pan|bolillo|telera|avena|cereal|galleta|papa|camote|elote|tamale|pozole/i, group: "cerealSG", label: "Cereales S/G" },
+  { pattern: /manzana|naranja|plátano|platano|mango|sandía|sandia|melón|melon|uva|pera|durazno|fruta|jugo|papaya|guayaba|fresa|kiwi/i, group: "frutas", label: "Frutas" },
+  { pattern: /espinaca|brócoli|brocoli|zanahoria|pepino|tomate|jitomate|verdura|lechuga|chayote|calabaza|nopal|acelga|betabel|ejote|col|coliflor/i, group: "verduras", label: "Verduras" },
+  { pattern: /aceite|mantequilla|margarina|manteca/i,      group: "grasaSP",    label: "Grasas S/P" },
+  { pattern: /aguacate|nuez|almendra|cacahuate|ajonjolí|pepita|semilla/i, group: "grasaSP", label: "Grasas S/P" },
+  { pattern: /refresco|coca|pepsi|azúcar|azucar|mermelada|miel|cajeta|chocolate|dulce|caramelo|nieve|helado|paleta/i, group: "azucarSG", label: "Azúcares" },
+];
+
+function detectGroup(name: string): { group: EquivKey; label: string } | null {
+  for (const entry of RECALL_GROUPS) {
+    if (entry.pattern.test(name)) return { group: entry.group, label: entry.label };
+  }
+  return null;
+}
+
 // ─── Calculation functions ────────────────────────────────────────────────────
 function mifflinBMR(w: number, h: number, a: number, sex: string) {
   return sex === "male" ? 10 * w + 6.25 * h - 5 * a + 5 : 10 * w + 6.25 * h - 5 * a - 161;
@@ -117,39 +146,40 @@ function r(n: number) { return Math.round(n); }
 function r1(n: number) { return Math.round(n * 10) / 10; }
 
 function autoDistribute(targetKcal: number, proteinG: number, fatG: number, carbsG: number): Equivs {
-  const base: Equivs = {
-    verduras: 3, frutas: 2, cerealSG: 0, cerealCG: 0,
-    leguminosas: 1, aoaMBAG: 0, aoaBAG: 0, aoaMAG: 0, aoaAAG: 0,
-    lecheDes: 1, lecheSemi: 0, lecheEntera: 0,
-    grasaSP: 0, grasaCP: 0, azucarSG: 0, azucarCG: 0,
-  };
+  // Proper SMAE sequence:
+  // 1. Fix base groups (verduras, frutas, leche descremada)
+  // 2. Leguminosas (protein + carbs contributor)
+  // 3. AOA (remaining protein, MBAG preferred)
+  // 4. Cereales SG (remaining carbs)
+  // 5. Grasas SP (remaining fat)
+  const verduras = 3;    // 25 kcal, 2P, 0L, 4HC each
+  const frutas = 2;      // 60 kcal, 0P, 0L, 15HC each
+  const lecheDes = 1;    // 95 kcal, 9P, 2L, 12HC each
+  const leguminosas = 1; // 120 kcal, 8P, 1L, 20HC each
 
-  // Baseline macros
-  let remP = proteinG - (3 * 2 + 1 * 8 + 1 * 9);      // verduras + leguminosas + lecheDes protein
-  let remL = fatG - (1 * 2);                             // lecheDes fat
-  let remHC = carbsG - (3 * 4 + 2 * 15 + 1 * 20 + 1 * 12); // verduras + frutas + leguminosas + lecheDes HC
+  // Macros consumed by base groups
+  const baseP  = verduras * 2 + lecheDes * 9 + leguminosas * 8;
+  const baseL  = lecheDes * 2 + leguminosas * 1;
+  const baseHC = verduras * 4 + frutas * 15 + lecheDes * 12 + leguminosas * 20;
 
-  remP = Math.max(0, remP);
-  remL = Math.max(0, remL);
-  remHC = Math.max(0, remHC);
+  // AOA M.B.A.G. for remaining protein (7P, 1L each)
+  const remP = Math.max(0, proteinG - baseP);
+  const aoaMBAG = Math.min(10, Math.max(0, r(remP / 7)));
 
-  // AOA B.A.G. (7P, 3L, 55 kcal) — main protein source
-  const aoaBAG = Math.min(8, Math.max(1, r(remP / 7)));
-  remP -= aoaBAG * 7;
-  remL -= aoaBAG * 3;
-
-  // Cereales S/G (2P, 0L, 15HC, 70 kcal) — main carb source
+  // Cereales S/G for remaining carbs (2P, 0L, 15HC each)
+  const remHC = Math.max(0, carbsG - baseHC);
   const cerealSG = Math.min(14, Math.max(2, r(remHC / 15)));
-  remHC -= cerealSG * 15;
-  remP -= cerealSG * 2;
 
-  // Grasas S/P (0P, 5L, 45 kcal)
-  const grasaSP = Math.max(0, Math.min(10, r(Math.max(0, remL) / 5)));
+  // Grasas S/P for remaining fat (0P, 5L each)
+  const remL = Math.max(0, fatG - baseL - aoaMBAG * 1);
+  const grasaSP = Math.min(10, Math.max(0, r(remL / 5)));
 
-  // Azúcares from any remaining HC
-  const azucarSG = Math.max(0, Math.min(3, r(remHC / 10)));
-
-  return { ...base, aoaBAG, cerealSG, grasaSP, azucarSG };
+  return {
+    verduras, frutas, cerealSG, cerealCG: 0,
+    leguminosas, aoaMBAG, aoaBAG: 0, aoaMAG: 0, aoaAAG: 0,
+    lecheDes, lecheSemi: 0, lecheEntera: 0,
+    grasaSP, grasaCP: 0, azucarSG: 0, azucarCG: 0,
+  };
 }
 
 function computeTotals(equivs: Equivs) {
@@ -188,11 +218,11 @@ function NumInput({
   unit?: string; min?: number; max?: number; step?: number; hint?: string; small?: boolean;
 }) {
   const [raw, setRaw] = useState(String(value));
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    const parsed = parseFloat(raw);
-    if (isNaN(parsed) || parsed !== value) setRaw(String(value));
-  }, [value]); // eslint-disable-line
+    if (!focused) setRaw(String(value));
+  }, [value, focused]);
 
   return (
     <div className="space-y-1">
@@ -204,6 +234,12 @@ function NumInput({
           max={max}
           step={step}
           value={raw}
+          onFocus={() => setFocused(true)}
+          onBlur={() => {
+            setFocused(false);
+            const v = parseFloat(raw);
+            if (isNaN(v) || raw === "") setRaw(String(value));
+          }}
           onChange={(e) => {
             setRaw(e.target.value);
             const v = parseFloat(e.target.value);
@@ -297,25 +333,38 @@ function EquivRow({
 }) {
   const g = SMAE[groupKey];
   const [raw, setRaw] = useState(String(n));
+  const [focused, setFocused] = useState(false);
 
-  useEffect(() => { setRaw(String(n)); }, [n]); // eslint-disable-line
+  useEffect(() => { if (!focused) setRaw(String(n)); }, [n, focused]); // eslint-disable-line
 
   return (
-    <div className="grid grid-cols-[180px_60px_60px_50px_50px_50px] gap-2 items-center py-1.5 border-b border-[hsl(var(--border))] last:border-0 text-sm">
+    <div className="grid grid-cols-[160px_100px_60px_50px_50px_50px] gap-2 items-center py-1.5 border-b border-[hsl(var(--border))] last:border-0 text-sm">
       <div className="flex items-center gap-2">
         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: g.color }} />
         <span className="text-xs font-medium">{g.label}</span>
       </div>
-      <Input
-        type="number" min={0} max={20} step={0.5}
-        value={raw}
-        onChange={(e) => {
-          setRaw(e.target.value);
-          const v = parseFloat(e.target.value);
-          if (!isNaN(v)) onN(v);
-        }}
-        className="h-7 text-xs text-center px-1"
-      />
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onN(Math.max(0, n - 0.5))}
+          className="w-6 h-6 rounded border border-[hsl(var(--border))] flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] shrink-0 text-xs font-bold"
+        >−</button>
+        <Input
+          type="number" min={0} max={20} step={0.5}
+          value={raw}
+          onFocus={() => setFocused(true)}
+          onBlur={() => { setFocused(false); const v = parseFloat(raw); if (isNaN(v) || raw === "") setRaw(String(n)); }}
+          onChange={(e) => {
+            setRaw(e.target.value);
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) onN(v);
+          }}
+          className="h-7 text-xs text-center px-1 w-12"
+        />
+        <button
+          onClick={() => onN(n + 0.5)}
+          className="w-6 h-6 rounded border border-[hsl(var(--border))] flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] shrink-0 text-xs font-bold"
+        >+</button>
+      </div>
       <div className="text-xs text-center text-[hsl(var(--muted-foreground))]">{r(n * g.kcal)}</div>
       <div className="text-xs text-center text-blue-600">{r(n * g.p)}</div>
       <div className="text-xs text-center text-yellow-600">{r(n * g.l)}</div>
@@ -456,6 +505,38 @@ export default function CalcPage() {
     l: totals.l - macros.fatG,
     hc: totals.hc - macros.carbsG,
   };
+
+  // ── 24h Recall ──────────────────────────────────────────────────────────────
+  const [waterMl, setWaterMl] = useState(0);
+  const [waterRaw, setWaterRaw] = useState("0");
+  const [recallInput, setRecallInput] = useState("");
+  const [recallQty, setRecallQty] = useState("");
+  type RecallFood = { id: number; name: string; qty: string; detected: { group: EquivKey; label: string } | null };
+  const [recallFoods, setRecallFoods] = useState<RecallFood[]>([]);
+  const [recallCounter, setRecallCounter] = useState(0);
+
+  function addRecallFood() {
+    const name = recallInput.trim();
+    if (!name) return;
+    const detected = detectGroup(name);
+    setRecallFoods((prev) => [...prev, { id: recallCounter, name, qty: recallQty.trim(), detected }]);
+    setRecallCounter((c) => c + 1);
+    setRecallInput("");
+    setRecallQty("");
+  }
+
+  function removeRecallFood(id: number) {
+    setRecallFoods((prev) => prev.filter((f) => f.id !== id));
+  }
+
+  // Group summary for recall
+  const recallGroupCounts = useMemo(() => {
+    const counts: Partial<Record<EquivKey, number>> = {};
+    for (const f of recallFoods) {
+      if (f.detected) counts[f.detected.group] = (counts[f.detected.group] ?? 0) + 1;
+    }
+    return counts;
+  }, [recallFoods]);
 
   const pctOk = macros.sum >= 98 && macros.sum <= 102;
 
@@ -797,22 +878,143 @@ export default function CalcPage() {
             </div>
           </SectionCard>
 
-          {/* IMC & summary mini-card */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "IMC", value: r1(weight / Math.pow(height / 100, 2)), unit: "kg/m²", color: "#6366f1" },
-              { label: "Peso ideal ♀", value: r(height - 100 - (height - 150) / 4), unit: "kg", color: "#ec4899" },
-              { label: "Peso ideal ♂", value: r(height - 100 - (height - 150) / 2.5), unit: "kg", color: "#06b6d4" },
-            ].map(({ label, value, unit, color }) => (
-              <div key={label} className="bg-white rounded-xl border border-[hsl(var(--border))] p-3 text-center">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-1">{label}</p>
-                <p className="text-xl font-bold" style={{ color }}>{value}</p>
-                <p className="text-[10px] text-[hsl(var(--muted-foreground))]">{unit}</p>
+          {/* IMC mini-card */}
+          {(() => {
+            const bmi = r1(weight / Math.pow(height / 100, 2));
+            const cat = bmi < 18.5 ? { label: "Bajo peso", color: "#2563eb" }
+              : bmi < 25 ? { label: "Peso normal", color: "#16a34a" }
+              : bmi < 30 ? { label: "Sobrepeso", color: "#ca8a04" }
+              : bmi < 35 ? { label: "Obesidad I", color: "#ea580c" }
+              : bmi < 40 ? { label: "Obesidad II", color: "#dc2626" }
+              : { label: "Obesidad III", color: "#991b1b" };
+            return (
+              <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4 flex items-center gap-5">
+                <div className="text-center">
+                  <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-1">IMC</p>
+                  <p className="text-2xl font-bold" style={{ color: "#6366f1" }}>{bmi}</p>
+                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">kg/m²</p>
+                </div>
+                <div className="h-10 w-px bg-[hsl(var(--border))]" />
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: cat.color }}>{cat.label}</p>
+                  <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">Clasificación OMS</p>
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </div>
       </div>
+
+      {/* ── 24h Recall ─────────────────────────────────────────────────────── */}
+      <SectionCard icon={ClipboardList} title="Recordatorio de 24 horas">
+        <div className="flex flex-col gap-4">
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">
+            Registra lo que el paciente consumió en las últimas 24 horas. El sistema detecta el grupo SMAE automáticamente.
+          </p>
+
+          {/* Water intake */}
+          <div className="flex items-center gap-3">
+            <Droplets className="w-4 h-4 text-blue-400 shrink-0" />
+            <Label className="text-sm shrink-0">Agua consumida</Label>
+            <Input
+              type="number" min={0} max={6000} step={100}
+              value={waterRaw}
+              onFocus={() => {}}
+              onBlur={() => { const v = parseInt(waterRaw); if (isNaN(v) || waterRaw === "") setWaterRaw(String(waterMl)); }}
+              onChange={(e) => {
+                setWaterRaw(e.target.value);
+                const v = parseInt(e.target.value);
+                if (!isNaN(v)) setWaterMl(v);
+              }}
+              className="h-8 w-24 text-sm"
+            />
+            <span className="text-sm text-[hsl(var(--muted-foreground))]">mL</span>
+            {waterMl >= 1500 && <span className="text-xs text-green-600 font-medium">Adecuada</span>}
+            {waterMl > 0 && waterMl < 1500 && <span className="text-xs text-orange-500 font-medium">Insuficiente (&lt;1500 mL)</span>}
+          </div>
+
+          {/* Add food input */}
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
+              <Label className="text-xs text-[hsl(var(--muted-foreground))]">Alimento</Label>
+              <Input
+                value={recallInput}
+                onChange={(e) => setRecallInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addRecallFood()}
+                placeholder="Ej. tortilla, huevo, frijoles…"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-36">
+              <Label className="text-xs text-[hsl(var(--muted-foreground))]">Cantidad / porción</Label>
+              <Input
+                value={recallQty}
+                onChange={(e) => setRecallQty(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addRecallFood()}
+                placeholder="Ej. 2 piezas, 1 taza"
+                className="h-8 text-sm"
+              />
+            </div>
+            <Button size="sm" onClick={addRecallFood} className="h-8 gap-1.5 text-white shrink-0" style={{ backgroundColor: ACCENT }}>
+              <Plus className="w-3.5 h-3.5" />
+              Agregar
+            </Button>
+          </div>
+
+          {/* Food list */}
+          {recallFoods.length > 0 && (
+            <div className="rounded-lg border border-[hsl(var(--border))] overflow-hidden">
+              <div className="grid grid-cols-[1fr_160px_140px_32px] gap-2 px-3 py-2 text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide bg-[hsl(var(--muted))]">
+                <span>Alimento</span>
+                <span>Cantidad</span>
+                <span>Grupo SMAE</span>
+                <span />
+              </div>
+              {recallFoods.map((food) => (
+                <div key={food.id} className="grid grid-cols-[1fr_160px_140px_32px] gap-2 px-3 py-2 items-center border-t border-[hsl(var(--border))] text-sm">
+                  <span className="text-sm">{food.name}</span>
+                  <span className="text-xs text-[hsl(var(--muted-foreground))]">{food.qty || "—"}</span>
+                  {food.detected ? (
+                    <span
+                      className="text-xs font-medium px-2 py-0.5 rounded-full w-fit"
+                      style={{ backgroundColor: `${SMAE[food.detected.group].color}30`, color: SMAE[food.detected.group].color }}
+                    >
+                      {food.detected.label}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-[hsl(var(--muted-foreground))] italic">Sin detectar</span>
+                  )}
+                  <button onClick={() => removeRecallFood(food.id)} className="w-6 h-6 rounded flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-red-500 hover:bg-red-50">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Group summary */}
+          {Object.keys(recallGroupCounts).length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-xs text-[hsl(var(--muted-foreground))] self-center">Grupos detectados:</span>
+              {(Object.entries(recallGroupCounts) as [EquivKey, number][]).map(([key, count]) => (
+                <span
+                  key={key}
+                  className="text-xs font-medium px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: `${SMAE[key].color}25`, color: SMAE[key].color }}
+                >
+                  {SMAE[key].label} ×{count}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {recallFoods.length === 0 && (
+            <p className="text-xs text-[hsl(var(--muted-foreground))] text-center py-4 italic">
+              Agrega alimentos para comenzar el recordatorio
+            </p>
+          )}
+        </div>
+      </SectionCard>
 
       {/* ── SMAE Equivalents (full width) ─────────────────────────────────── */}
       <SectionCard icon={Layers} title="Equivalentes SMAE del Día">
@@ -836,9 +1038,9 @@ export default function CalcPage() {
           {/* Group equivalents table */}
           <div className="bg-[hsl(var(--muted))/40] rounded-lg overflow-hidden border border-[hsl(var(--border))]">
             {/* Header */}
-            <div className="grid grid-cols-[180px_60px_60px_50px_50px_50px] gap-2 px-3 py-2 text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide bg-[hsl(var(--muted))]">
+            <div className="grid grid-cols-[160px_100px_60px_50px_50px_50px] gap-2 px-3 py-2 text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide bg-[hsl(var(--muted))]">
               <span>Grupo</span>
-              <span className="text-center">Equiv.</span>
+              <span className="text-center">Equiv. −/+</span>
               <span className="text-center">kcal</span>
               <span className="text-center text-blue-600">P</span>
               <span className="text-center text-yellow-600">L</span>
@@ -878,7 +1080,7 @@ export default function CalcPage() {
             </div>
 
             {/* Totals row */}
-            <div className="grid grid-cols-[180px_60px_60px_50px_50px_50px] gap-2 px-3 py-2 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))] font-semibold text-sm">
+            <div className="grid grid-cols-[160px_100px_60px_50px_50px_50px] gap-2 px-3 py-2 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))] font-semibold text-sm">
               <span className="text-xs">TOTAL</span>
               <span />
               <span className={cn("text-center text-xs", Math.abs(diff.kcal) < 50 ? "text-green-600" : "text-orange-600")}>
@@ -896,23 +1098,28 @@ export default function CalcPage() {
             </div>
           </div>
 
-          {/* Difference from target */}
+          {/* % Adecuación cards */}
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: "kcal", val: diff.kcal, target: targetKcal, tol: 50 },
-              { label: "Proteína (g)", val: diff.p, target: macros.proteinG, tol: 5 },
-              { label: "Lípidos (g)", val: diff.l, target: macros.fatG, tol: 5 },
-              { label: "Hidratos (g)", val: diff.hc, target: macros.carbsG, tol: 10 },
-            ].map(({ label, val, target, tol }) => {
-              const ok = Math.abs(val) <= tol;
-              const sign = val > 0 ? "+" : "";
+              { label: "kcal", actual: totals.kcal, target: targetKcal, tol: 50 },
+              { label: "Proteína", actual: totals.p, target: macros.proteinG, tol: 5 },
+              { label: "Lípidos", actual: totals.l, target: macros.fatG, tol: 5 },
+              { label: "Hidratos", actual: totals.hc, target: macros.carbsG, tol: 10 },
+            ].map(({ label, actual, target, tol }) => {
+              const pct = target > 0 ? r(actual / target * 100) : 0;
+              const diff = actual - target;
+              const ok = Math.abs(diff) <= tol;
+              const sign = diff > 0 ? "+" : "";
               return (
                 <div key={label} className={cn("rounded-lg p-2.5 text-center border", ok ? "border-green-200 bg-green-50" : "border-orange-200 bg-orange-50")}>
-                  <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{label}</p>
-                  <p className="text-sm font-bold" style={{ color: ok ? "#16a34a" : "#ea580c" }}>
-                    {ok ? "✓" : `${sign}${val}`}
+                  <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-0.5">{label}</p>
+                  <p className="text-base font-bold" style={{ color: ok ? "#16a34a" : "#ea580c" }}>
+                    {pct}%
                   </p>
-                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">objetivo: {target}</p>
+                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                    {ok ? `${actual} ✓` : `${sign}${diff}g`}
+                  </p>
+                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">obj: {target}</p>
                 </div>
               );
             })}

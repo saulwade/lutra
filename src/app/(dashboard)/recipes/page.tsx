@@ -255,7 +255,7 @@ export default function RecipesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-5xl">
+    <div className="flex flex-col gap-5 w-full max-w-5xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>

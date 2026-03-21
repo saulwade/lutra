@@ -352,7 +352,7 @@ export default function PatientDetailPage({
     .toUpperCase();
 
   return (
-    <div className="flex flex-col gap-5 max-w-4xl">
+    <div className="flex flex-col gap-5 w-full max-w-4xl">
       {/* Back */}
       <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-[hsl(var(--muted-foreground))]">
         <Link href="/patients">

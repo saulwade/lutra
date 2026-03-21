@@ -111,10 +111,10 @@
   }
 
   html {
-    /* Smooth scrolling */
     scroll-behavior: smooth;
-    /* Support for dynamic viewport height on mobile */
-    height: -webkit-fill-available;
+    /* Prevent horizontal overflow on all pages */
+    overflow-x: hidden;
+    max-width: 100%;
   }
 
   body {
@@ -122,22 +122,13 @@
     color: hsl(var(--foreground));
     font-family: var(--font-geist-sans), system-ui, sans-serif;
     transition: background-color 0.2s ease, color 0.2s ease;
-    /* Safe area padding for iPhone notch / Dynamic Island */
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    /* Prevent horizontal scroll — critical for mobile */
+    overflow-x: hidden;
+    max-width: 100%;
     /* Better tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Minimum tap target size for all interactive elements */
-  button, [role="button"], a {
-    min-height: 44px;
-  }
-
-  /* Exceptions for inline or icon-only elements */
-  button[data-size="icon"],
-  .tap-sm {
-    min-height: unset;
+    /* Prevent text inflation on orientation change */
+    -webkit-text-size-adjust: 100%;
   }
 
   /* Smooth transitions on interactive elements */

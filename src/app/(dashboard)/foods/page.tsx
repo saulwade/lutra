@@ -116,7 +116,7 @@ export default function FoodsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-6xl">
+    <div className="flex flex-col gap-5 w-full max-w-6xl">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold">Base de Alimentos SMAE</h1>

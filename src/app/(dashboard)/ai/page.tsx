@@ -355,7 +355,7 @@ export default function AIPlanPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex flex-col gap-6 w-full max-w-3xl">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold flex items-center gap-2">

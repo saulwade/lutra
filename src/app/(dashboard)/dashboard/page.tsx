@@ -132,7 +132,7 @@ export default function DashboardPage() {
   const isFirstTime = !isLoading && (patients?.length ?? 0) === 0;
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl">
+    <div className="flex flex-col gap-5 w-full max-w-6xl">
 
       {/* ── First-time onboarding card ── */}
       {isFirstTime && (

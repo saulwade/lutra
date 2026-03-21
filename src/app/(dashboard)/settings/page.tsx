@@ -116,7 +116,7 @@ export default function SettingsPage() {
     .toUpperCase() ?? "?";
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 w-full max-w-2xl">
       <div>
         <h1 className="text-xl font-bold">Ajustes</h1>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">

@@ -129,7 +129,7 @@ export default function SettingsPage() {
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           {/* Profile photo section */}
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                 Foto de Perfil
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                     className="w-16 h-16 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
                     <span className="text-[hsl(var(--primary))] text-xl font-bold">
                       {initials}
                     </span>
@@ -167,7 +167,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Personal info */}
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                 Información Personal
@@ -206,7 +206,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Professional info */}
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                 Información Profesional
@@ -247,7 +247,7 @@ export default function SettingsPage() {
               type="submit"
               disabled={isSubmitting || !isDirty}
               className={cn(
-                "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]",
+                "bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]",
                 !isDirty && "opacity-50"
               )}
             >
@@ -269,7 +269,7 @@ function SettingsSkeleton() {
   return (
     <div className="flex flex-col gap-5">
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="bg-white rounded-xl border border-[hsl(var(--border))] p-4">
+        <div key={i} className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4">
           <Skeleton className="h-5 w-32 mb-4" />
           <Separator className="mb-4" />
           <div className="grid sm:grid-cols-2 gap-4">

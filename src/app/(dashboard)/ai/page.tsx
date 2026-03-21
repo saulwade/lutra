@@ -13,6 +13,11 @@ import {
   AlertTriangle,
   RefreshCw,
   Leaf,
+  Sun,
+  Moon,
+  Coffee,
+  Utensils,
+  Apple,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,6 +117,9 @@ export default function AIPlanPage() {
   // ── Recall state ──
   const [adaptFromRecall, setAdaptFromRecall] = useState(true);
   const [recall24h, setRecall24h] = useState("");
+  const [recallFields, setRecallFields] = useState({
+    desayuno: "", colAm: "", comida: "", colPm: "", cena: "",
+  });
 
   // ── Review state ──
   const [equivalents, setEquivalents] = useState<Record<string, number>>({});
@@ -160,7 +168,9 @@ export default function AIPlanPage() {
     setProteinPct(20);
     setFatPct(30);
     // Pre-fill recall from patient profile
-    setRecall24h(patient.recall24h ?? "");
+    const raw = patient.recall24h ?? "";
+    setRecall24h(raw);
+    setRecallFields(parseRecallFields(raw));
     setAdaptFromRecall(!!(patient.recall24h));
     setRecallWasEdited(false);
     setStep("setup");
@@ -188,6 +198,44 @@ export default function AIPlanPage() {
     const f = clamp(remaining - p, 10, 50);
     setProteinPct(p);
     setFatPct(f);
+  }
+
+  // ── Recall helpers ──────────────────────────────────────────────────────────
+
+  function composeRecall(fields: typeof recallFields): string {
+    const lines = [
+      fields.desayuno && `Desayuno: ${fields.desayuno}`,
+      fields.colAm    && `Colación AM: ${fields.colAm}`,
+      fields.comida   && `Comida: ${fields.comida}`,
+      fields.colPm    && `Colación PM: ${fields.colPm}`,
+      fields.cena     && `Cena: ${fields.cena}`,
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+
+  function parseRecallFields(raw: string): typeof recallFields {
+    const fields = { desayuno: "", colAm: "", comida: "", colPm: "", cena: "" };
+    if (!raw.trim()) return fields;
+    // Si tiene etiquetas estructuradas, parsearlas
+    if (/desayuno:/i.test(raw)) {
+      fields.desayuno = (raw.match(/desayuno:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      fields.colAm    = (raw.match(/colaci[oó]n am:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      fields.comida   = (raw.match(/comida:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      fields.colPm    = (raw.match(/colaci[oó]n pm:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      fields.cena     = (raw.match(/cena:\s*([^\n]*)/i)?.[1] ?? "").trim();
+    } else {
+      // Formato libre: poner todo en desayuno como fallback
+      fields.desayuno = raw.trim();
+    }
+    return fields;
+  }
+
+  function updateRecallField(key: keyof typeof recallFields, value: string) {
+    const next = { ...recallFields, [key]: value };
+    setRecallFields(next);
+    const composed = composeRecall(next);
+    setRecall24h(composed);
+    setRecallWasEdited(composed.trim() !== (selectedPatient?.recall24h ?? "").trim());
   }
 
   async function runGenerate(fromReview = false) {
@@ -334,7 +382,7 @@ export default function AIPlanPage() {
                 isCurrent
                   ? "bg-[hsl(var(--primary))] text-white"
                   : isDone
-                  ? "bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))]"
+                  ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
                   : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
               )}>
                 {label}
@@ -347,7 +395,7 @@ export default function AIPlanPage() {
 
       {/* ── Step 1: Select patient ── */}
       {step === "select" && (
-        <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-4">
+        <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))]" />
             <Input
@@ -375,7 +423,7 @@ export default function AIPlanPage() {
                   onClick={() => handleSelectPatient(patient)}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-[hsl(var(--muted))] transition-colors text-left"
                 >
-                  <div className="w-9 h-9 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center shrink-0">
                     <User className="w-4 h-4 text-[hsl(var(--primary))]" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -401,7 +449,7 @@ export default function AIPlanPage() {
 
       {/* ── Step 2: Setup ── */}
       {step === "setup" && selectedPatient && (
-        <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-5">
+        <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-5">
           {/* Patient summary */}
           <div className="bg-[hsl(var(--muted))] rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div>
@@ -568,7 +616,7 @@ export default function AIPlanPage() {
             </Button>
             <Button
               onClick={() => setStep("recall")}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
             >
               Siguiente →
             </Button>
@@ -578,7 +626,7 @@ export default function AIPlanPage() {
 
       {/* ── Step 3: Recall / eating habits ── */}
       {step === "recall" && selectedPatient && (
-        <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-5">
+        <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-5">
           <div>
             <h2 className="text-sm font-semibold">Alimentación habitual</h2>
             <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
@@ -622,28 +670,75 @@ export default function AIPlanPage() {
             </button>
           </div>
 
-          {/* Recall textarea */}
+          {/* Recall estructurado */}
           {adaptFromRecall && (
-            <div className="space-y-1.5">
-              <Label htmlFor="recall24h">
-                Recordatorio 24hr
-                {selectedPatient.recall24h && (
-                  <span className="ml-2 text-xs text-green-600 font-normal">· cargado del perfil del paciente</span>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold text-[hsl(var(--text-strong))]">
+                  Recordatorio 24 horas
+                  {selectedPatient.recall24h && (
+                    <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-normal">
+                      cargado del perfil
+                    </span>
+                  )}
+                </Label>
+                {recallWasEdited && recall24h.trim() && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveRecallToProfile}
+                    disabled={savingRecall}
+                    className="h-6 text-[10px] px-2 gap-1"
+                  >
+                    {savingRecall
+                      ? <Loader2 className="w-3 h-3 animate-spin" />
+                      : null}
+                    Guardar en perfil
+                  </Button>
                 )}
-              </Label>
-              <Textarea
-                id="recall24h"
-                rows={5}
-                value={recall24h}
-                onChange={(e) => {
-                  setRecall24h(e.target.value);
-                  setRecallWasEdited(e.target.value.trim() !== (selectedPatient?.recall24h ?? "").trim());
-                }}
-                placeholder={"Describe qué come el paciente en un día típico:\n\nDesayuno: 2 huevos revueltos, 2 tortillas de maíz, café con leche...\nColación: 1 fruta\nComida: arroz, frijoles, pollo a la plancha, agua de sabor...\nCena: sopa de pasta, pan dulce..."}
-                className="text-sm"
-              />
+              </div>
+
+              {/* 5 meal fields */}
+              {([
+                { key: "desayuno" as const, icon: Sun,      label: "Desayuno",     placeholder: "Ej: 2 huevos revueltos, 2 tortillas, café con leche",        accent: "#d97706", bg: "#fef9c3" },
+                { key: "colAm"    as const, icon: Coffee,   label: "Colación AM",  placeholder: "Ej: 1 fruta, yogurt, puñado de nueces",                       accent: "#16a34a", bg: "#dcfce7" },
+                { key: "comida"   as const, icon: Utensils, label: "Comida",       placeholder: "Ej: arroz, frijoles, pollo a la plancha, agua de sabor",      accent: "#2563eb", bg: "#dbeafe" },
+                { key: "colPm"    as const, icon: Apple,    label: "Colación PM",  placeholder: "Ej: galletas, fruta, agua de sabor",                          accent: "#ea580c", bg: "#ffedd5" },
+                { key: "cena"     as const, icon: Moon,     label: "Cena",         placeholder: "Ej: sopa de pasta, pan dulce, leche",                         accent: "#7c3aed", bg: "#ede9fe" },
+              ] as const).map(({ key, icon: Icon, label, placeholder, accent, bg }) => (
+                <div
+                  key={key}
+                  className="flex gap-2.5 items-start rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2.5 focus-within:border-[hsl(var(--primary))] transition-colors"
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ backgroundColor: bg }}
+                  >
+                    <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-1">
+                      {label}
+                    </p>
+                    <textarea
+                      rows={1}
+                      value={recallFields[key]}
+                      onChange={(e) => updateRecallField(key, e.target.value)}
+                      placeholder={placeholder}
+                      className="w-full resize-none bg-transparent text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))]/60 outline-none leading-snug"
+                      style={{ minHeight: "1.4rem" }}
+                      onInput={(e) => {
+                        const el = e.currentTarget;
+                        el.style.height = "auto";
+                        el.style.height = el.scrollHeight + "px";
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+
               <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                La IA reconocerá los patrones y ajustará el plan gradualmente hacia los objetivos nutricionales.
+                La IA reconocerá los patrones y ajustará el plan gradualmente hacia los objetivos nutricionales. Puedes dejar vacíos los tiempos que no apliquen.
               </p>
             </div>
           )}
@@ -659,7 +754,7 @@ export default function AIPlanPage() {
             <Button variant="outline" onClick={() => setStep("setup")}>← Ajustar configuración</Button>
             <Button
               onClick={handleGenerate}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
               Generar con IA
@@ -670,8 +765,8 @@ export default function AIPlanPage() {
 
       {/* ── Generating ── */}
       {step === "generating" && (
-        <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-10 flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center">
+        <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-10 flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
             <Sparkles className="w-8 h-8 text-[hsl(var(--primary))] animate-pulse" />
           </div>
           <p className="text-sm font-semibold">Generando plan con IA...</p>
@@ -687,7 +782,7 @@ export default function AIPlanPage() {
 
       {/* ── Step 4: Review ── */}
       {step === "review" && (
-        <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-4">
+        <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-4">
           {/* AI reasoning */}
           {reasoning && (
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
@@ -815,7 +910,7 @@ export default function AIPlanPage() {
             <Button
               onClick={handleSave}
               disabled={saving || !planTitle.trim() || regenerating}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] gap-1.5"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
             >
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Guardar plan

@@ -5,6 +5,7 @@ import * as React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { cn } from "@/lib/utils";
+import { normalizeQuery, rankFoodResults, debugMatch } from "@/lib/food-matcher";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +45,7 @@ interface FoodSearchProps {
   maxHeight?: string;
 }
 
-// ─── SMAE categories (common ones) ───────────────────────────────────────────
+// ─── SMAE categories ─────────────────────────────────────────────────────────
 
 const SMAE_CATEGORIES = [
   { value: "all", label: "Todas las categorías" },
@@ -102,9 +103,9 @@ function FoodRow({
           {food.calories} kcal
         </p>
         <div className="mt-0.5 flex justify-end gap-1.5 text-xs text-[hsl(var(--muted-foreground))]">
-          <span className="text-blue-600">P {food.proteinG}g</span>
-          <span className="text-yellow-600">G {food.fatG}g</span>
-          <span className="text-green-600">C {food.carbsG}g</span>
+          <span className="text-blue-600 dark:text-blue-400">P {food.proteinG}g</span>
+          <span className="text-yellow-600 dark:text-yellow-400">G {food.fatG}g</span>
+          <span className="text-green-600 dark:text-green-400">C {food.carbsG}g</span>
         </div>
       </div>
     </button>
@@ -147,21 +148,68 @@ export function FoodSearch({
     return () => clearTimeout(timer);
   }, [inputValue]);
 
-  const results = useQuery(
+  // Normalizar el query antes de enviar a Convex
+  const normalizedQuery = React.useMemo(
+    () => (debouncedQuery.length >= 2 ? normalizeQuery(debouncedQuery) : ""),
+    [debouncedQuery]
+  );
+
+  // Query principal con el término normalizado (más preciso)
+  const primaryResults = useQuery(
     api.foods.searchFoods,
-    debouncedQuery.length >= 2
+    normalizedQuery.length >= 2
       ? {
-          query: debouncedQuery,
+          query: normalizedQuery,
           category: category !== "all" ? category : undefined,
-          limit: 30,
+          limit: 40,
         }
       : "skip"
   );
 
-  const isLoading = debouncedQuery.length >= 2 && results === undefined;
-  const hasResults = Array.isArray(results) && results.length > 0;
-  const showEmpty =
-    debouncedQuery.length >= 2 && !isLoading && !hasResults;
+  // Query secundario con el input original (si difiere del normalizado)
+  // Captura alimentos que contengan las palabras originales aunque el normalizado no las tenga
+  const originalDiffersFromNormalized =
+    debouncedQuery.length >= 2 &&
+    normalizedQuery !== debouncedQuery.toLowerCase();
+
+  const secondaryResults = useQuery(
+    api.foods.searchFoods,
+    originalDiffersFromNormalized
+      ? {
+          query: debouncedQuery,
+          category: category !== "all" ? category : undefined,
+          limit: 20,
+        }
+      : "skip"
+  );
+
+  // Combinar, deduplicar y rankear con el matcher
+  const rankedResults = React.useMemo(() => {
+    if (!primaryResults && !secondaryResults) return undefined;
+
+    const combined = [...(primaryResults ?? []), ...(secondaryResults ?? [])];
+
+    // Deduplicar por _id
+    const seen = new Set<string>();
+    const unique = combined.filter((f) => {
+      if (seen.has(f._id)) return false;
+      seen.add(f._id);
+      return true;
+    });
+
+    // Debug en desarrollo
+    debugMatch(debouncedQuery, unique);
+
+    // Rankear: normalizar + score + filtrar absurdos
+    return rankFoodResults(debouncedQuery, unique);
+  }, [primaryResults, secondaryResults, debouncedQuery]);
+
+  const isLoading =
+    debouncedQuery.length >= 2 &&
+    (primaryResults === undefined || (originalDiffersFromNormalized && secondaryResults === undefined));
+
+  const hasResults = Array.isArray(rankedResults) && rankedResults.length > 0;
+  const showEmpty = debouncedQuery.length >= 2 && !isLoading && !hasResults;
   const showPrompt = debouncedQuery.length < 2;
 
   return (
@@ -206,6 +254,15 @@ export function FoodSearch({
         )}
       </div>
 
+      {/* Indicador de normalización (solo dev) */}
+      {process.env.NODE_ENV === "development" &&
+        debouncedQuery.length >= 2 &&
+        normalizedQuery !== debouncedQuery.toLowerCase() && (
+          <p className="text-[10px] text-[hsl(var(--muted-foreground))] font-mono px-1">
+            🔍 buscando: &quot;{normalizedQuery}&quot;
+          </p>
+        )}
+
       {/* Results area */}
       <div
         className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))]"
@@ -228,7 +285,7 @@ export function FoodSearch({
         {showEmpty && (
           <div className="flex h-28 flex-col items-center justify-center gap-1 text-sm text-[hsl(var(--muted-foreground))]">
             <Salad className="h-6 w-6 opacity-30" />
-            <span>Sin resultados para "{debouncedQuery}"</span>
+            <span>Sin resultados para &quot;{debouncedQuery}&quot;</span>
             {category !== "all" && (
               <button
                 type="button"
@@ -244,7 +301,7 @@ export function FoodSearch({
         {hasResults && (
           <ScrollArea style={{ maxHeight }}>
             <div className="py-1">
-              {results!.map((food) => (
+              {rankedResults!.map((food) => (
                 <FoodRow
                   key={food._id}
                   food={food as FoodItem}
@@ -253,7 +310,7 @@ export function FoodSearch({
               ))}
               <div className="px-3 py-1.5">
                 <Badge variant="secondary" className="text-xs">
-                  {results!.length} resultado{results!.length !== 1 ? "s" : ""}
+                  {rankedResults!.length} resultado{rankedResults!.length !== 1 ? "s" : ""}
                 </Badge>
               </div>
             </div>

@@ -276,7 +276,7 @@ export default function RecipesPage() {
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
           >
             <Plus className="w-4 h-4 mr-1" />
             Nueva Receta
@@ -303,7 +303,7 @@ export default function RecipesPage() {
           ))}
         </div>
       ) : filtered?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-xl border border-[hsl(var(--border))]">
+        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))]">
           <div className="w-14 h-14 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center">
             <ChefHat className="w-6 h-6 text-[hsl(var(--muted-foreground))]" />
           </div>
@@ -328,7 +328,7 @@ export default function RecipesPage() {
               <Button
                 size="sm"
                 onClick={() => setCreateDialogOpen(true)}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Crear receta
@@ -426,7 +426,7 @@ export default function RecipesPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Crear receta
@@ -457,7 +457,7 @@ export default function RecipesPage() {
 function RecipeCard({ recipe, onEdit, onDelete }: { recipe: any; onEdit: () => void; onDelete: () => void }) {
   const totalTime = (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0);
   return (
-    <div className="bg-white rounded-xl border border-[hsl(var(--border))] overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
+    <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
       {/* Image area */}
       <div className="relative w-full h-36 bg-[hsl(var(--muted))] shrink-0">
         {recipe.imageUrl ? (
@@ -472,7 +472,7 @@ function RecipeCard({ recipe, onEdit, onDelete }: { recipe: any; onEdit: () => v
           </div>
         )}
         {recipe.isPublic && (
-          <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 bg-white/90 rounded font-medium text-[hsl(var(--muted-foreground))]">
+          <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 bg-[hsl(var(--surface))]/90 rounded font-medium text-[hsl(var(--muted-foreground))]">
             Pública
           </span>
         )}
@@ -894,7 +894,7 @@ function RecipeDetailDialog({
                     onClick={handleAddIngredient}
                     disabled={addingIngredient}
                     size="sm"
-                    className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] w-full"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] w-full"
                   >
                     {addingIngredient && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                     Agregar ingrediente
@@ -1100,7 +1100,7 @@ function ImportRecipeDialog({
               <Button
                 onClick={handleParse}
                 disabled={!recipeName.trim() || !rawText.trim()}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 Detectar ingredientes →
               </Button>
@@ -1167,7 +1167,7 @@ function ImportRecipeDialog({
                                 "text-xs px-2 py-1 rounded border transition-colors",
                                 selected?._id === food._id
                                   ? "bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]"
-                                  : "bg-white hover:bg-[hsl(var(--muted))] border-[hsl(var(--border))]"
+                                  : "bg-[hsl(var(--surface))] hover:bg-[hsl(var(--muted))] border-[hsl(var(--border))]"
                               )}
                             >
                               {food.name}
@@ -1254,7 +1254,7 @@ function ImportRecipeDialog({
               <Button
                 onClick={handleCreate}
                 disabled={creating || matchedCount === 0}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {creating && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Crear receta con {matchedCount} ingrediente{matchedCount !== 1 ? "s" : ""}
@@ -1280,7 +1280,7 @@ function MacroBox({ label, value, color }: { label: string; value: any; color: s
 
 function IngredientRow({ ingredient, onRemove }: { ingredient: any; onRemove: () => void }) {
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg border bg-white text-sm">
+    <div className="flex items-center gap-2 p-2 rounded-lg border bg-[hsl(var(--surface))] text-sm">
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">
           {ingredient.food?.name ?? "Alimento desconocido"}

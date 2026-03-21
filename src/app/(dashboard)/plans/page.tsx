@@ -49,9 +49,9 @@ const ZERO_EQUIVALENTS = {
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-700",
-  draft: "bg-yellow-100 text-yellow-700",
-  archived: "bg-gray-100 text-gray-600",
+  active:   "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
+  draft:    "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] border border-[hsl(var(--border))]",
+  archived: "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))]",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -176,7 +176,7 @@ export default function PlansPage() {
           )}
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
             size="sm"
           >
             <Plus className="w-4 h-4 mr-1" />
@@ -251,7 +251,7 @@ export default function PlansPage() {
             <Button
               onClick={handleCreateFromTemplate}
               disabled={!templatePatientId || !selectedTemplateId || creatingFromTemplate}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
             >
               {creatingFromTemplate && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
               Crear plan
@@ -344,7 +344,7 @@ export default function PlansPage() {
             <Button
               onClick={handleCreate}
               disabled={!selectedPatientId || !title.trim() || macroSum !== 100 || submitting}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
             >
               {submitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
               Crear plan
@@ -360,17 +360,22 @@ export default function PlansPage() {
           ))}
         </div>
       ) : patients.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-xl border border-[hsl(var(--border))]">
+        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))]">
           <div className="w-14 h-14 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center">
             <ClipboardList className="w-6 h-6 text-[hsl(var(--muted-foreground))]" />
           </div>
-          <p className="text-sm font-medium">Sin planes aún</p>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
-            Primero registra pacientes para poder crear planes
+          <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Aún no tienes pacientes</p>
+          <p className="text-xs text-[hsl(var(--muted-foreground))] text-center max-w-xs">
+            Los planes se generan por paciente. Registra al primero y usa la IA para crear su plan en segundos.
           </p>
-          <Button asChild size="sm" className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] mt-1">
-            <Link href="/patients">Agregar paciente</Link>
-          </Button>
+          <div className="flex gap-2 mt-1">
+            <Button asChild size="sm" variant="outline">
+              <Link href="/patients">Agregar paciente</Link>
+            </Button>
+            <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]">
+              <Link href="/ai">Generar plan con IA</Link>
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
@@ -444,7 +449,7 @@ function PatientPlansSection({
     <div>
       {/* Patient header */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+        <div className="w-7 h-7 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
           <span className="text-[hsl(var(--primary))] text-xs font-semibold">{initials}</span>
         </div>
         <Link
@@ -469,14 +474,14 @@ function PatientPlansSection({
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
             Sin planes para este paciente
           </p>
-          <Button asChild size="sm" variant="outline" className="ml-auto">
-            <Link href={`/patients/${patientId}`}>Crear plan</Link>
+          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] ml-auto">
+            <Link href="/ai">Generar con IA</Link>
           </Button>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {filtered.map((plan) => (
-            <div key={plan._id} className="group/card bg-white rounded-xl border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors">
+            <div key={plan._id} className="group/card bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] hover:bg-[hsl(var(--warm-cream))] hover:border-[hsl(var(--border))] hover:shadow-sm transition-all">
               <Link
                 href={`/plans/${plan._id}`}
                 className="flex flex-col gap-3 p-4 block"

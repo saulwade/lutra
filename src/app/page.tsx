@@ -717,15 +717,17 @@ export default async function LandingPage() {
       <footer className="border-t border-[hsl(214,32%,91%)] py-10 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <img src="/lutra-logo.svg" alt="Lutra" className="w-7 h-7 rounded-lg shrink-0" />
               <span className="font-bold text-sm">Lutra</span>
-              <span className="text-xs text-[hsl(215,16%,47%)] ml-2">
+              <span className="text-xs text-[hsl(215,16%,47%)] ml-1">
                 © {new Date().getFullYear()} Todos los derechos reservados.
               </span>
             </div>
-            <div className="flex gap-5 text-xs text-[hsl(215,16%,47%)]">
+            <div className="flex flex-wrap justify-center gap-5 text-xs text-[hsl(215,16%,47%)]">
               <a href="#precios" className="hover:text-[hsl(81,10%,54%)] transition-colors">Precios</a>
+              <Link href="/terminos" className="hover:text-[hsl(81,10%,54%)] transition-colors">Términos de uso</Link>
+              <Link href="/privacidad" className="hover:text-[hsl(81,10%,54%)] transition-colors">Privacidad</Link>
               <Link href="/login" className="hover:text-[hsl(81,10%,54%)] transition-colors">Iniciar sesión</Link>
               <Link href="/signup" className="hover:text-[hsl(81,10%,54%)] transition-colors">Registrarse</Link>
             </div>

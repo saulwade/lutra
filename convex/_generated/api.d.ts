@@ -15,9 +15,12 @@ import type * as foods from "../foods.js";
 import type * as meals from "../meals.js";
 import type * as measurements from "../measurements.js";
 import type * as nutritionists from "../nutritionists.js";
+import type * as patientPathologies from "../patientPathologies.js";
 import type * as patients from "../patients.js";
+import type * as planVersions from "../planVersions.js";
 import type * as plans from "../plans.js";
 import type * as recipes from "../recipes.js";
+import type * as screenings from "../screenings.js";
 
 import type {
   ApiFromModules,
@@ -33,9 +36,12 @@ declare const fullApi: ApiFromModules<{
   meals: typeof meals;
   measurements: typeof measurements;
   nutritionists: typeof nutritionists;
+  patientPathologies: typeof patientPathologies;
   patients: typeof patients;
+  planVersions: typeof planVersions;
   plans: typeof plans;
   recipes: typeof recipes;
+  screenings: typeof screenings;
 }>;
 
 /**

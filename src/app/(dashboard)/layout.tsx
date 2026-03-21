@@ -6,7 +6,7 @@ import { AuthGuard } from "@/components/providers/auth-guard";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[hsl(var(--muted))]">
+    <div className="flex min-h-screen bg-[hsl(var(--background))]">
       <Sidebar />
 
       {/* Main column */}

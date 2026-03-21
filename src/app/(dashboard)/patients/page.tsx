@@ -20,6 +20,11 @@ import {
   CheckCircle2,
   X,
   AlertTriangle,
+  Sun,
+  Moon,
+  Coffee,
+  Utensils,
+  Apple,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,11 +113,11 @@ const ACTIVITY_LABELS: Record<string, string> = {
 };
 
 const GOAL_COLORS: Record<string, string> = {
-  weight_loss: "bg-blue-100 text-blue-700",
-  maintenance: "bg-green-100 text-green-700",
-  weight_gain: "bg-orange-100 text-orange-700",
-  muscle_gain: "bg-purple-100 text-purple-700",
-  health: "bg-teal-100 text-teal-700",
+  weight_loss:  "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] border border-[hsl(var(--border))]",
+  maintenance:  "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
+  weight_gain:  "bg-[hsl(var(--muted))] text-[hsl(var(--slate-ui))] border border-[hsl(var(--border))]",
+  muscle_gain:  "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] border border-[hsl(var(--border))]",
+  health:       "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
 };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -125,6 +130,25 @@ export default function PatientsPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
   const [allergyInput, setAllergyInput] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
+  const [newRecallFields, setNewRecallFields] = useState({
+    desayuno: "", colAm: "", comida: "", colPm: "", cena: "",
+  });
+
+  function updateNewRecallField(key: string, value: string) {
+    setNewRecallFields((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function composeNewRecall() {
+    const { desayuno, colAm, comida, colPm, cena } = newRecallFields;
+    const parts = [
+      desayuno && `Desayuno: ${desayuno}`,
+      colAm && `Colación AM: ${colAm}`,
+      comida && `Comida: ${comida}`,
+      colPm && `Colación PM: ${colPm}`,
+      cena && `Cena: ${cena}`,
+    ].filter(Boolean);
+    return parts.join("\n");
+  }
 
   const patients = useQuery(api.patients.getPatients);
   const createPatient = useMutation(api.patients.createPatient);
@@ -165,13 +189,14 @@ export default function PatientsPage() {
         allergies: allergies.length > 0 ? allergies : undefined,
         foodPreferences: data.foodPreferences || undefined,
         adherenceRating: data.adherenceRating || undefined,
-        recall24h: data.recall24h || undefined,
+        recall24h: composeNewRecall() || undefined,
       });
       toast({ title: "Paciente registrado exitosamente" });
       setDialogOpen(false);
       reset();
       setAllergies([]);
       setAllergyInput("");
+      setNewRecallFields({ desayuno: "", colAm: "", comida: "", colPm: "", cena: "" });
     } catch {
       toast({
         title: "Error al registrar paciente",
@@ -214,7 +239,7 @@ export default function PatientsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold">Pacientes</h1>
+          <h1 className="text-xl font-bold text-[hsl(var(--text-strong))]">Pacientes</h1>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
             {patients === undefined
               ? "Cargando..."
@@ -232,7 +257,7 @@ export default function PatientsPage() {
           </Button>
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] w-fit"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] w-fit"
           >
             <Plus className="w-4 h-4 mr-1" />
             Nuevo Paciente
@@ -252,7 +277,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Patient List */}
-      <div className="bg-white rounded-xl border border-[hsl(var(--border))] overflow-hidden">
+      <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] overflow-hidden">
         {patients === undefined ? (
           <PatientListSkeleton />
         ) : filtered?.length === 0 ? (
@@ -272,7 +297,7 @@ export default function PatientsPage() {
               <Button
                 size="sm"
                 onClick={() => setDialogOpen(true)}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] mt-2"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] mt-2"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Agregar paciente
@@ -282,7 +307,7 @@ export default function PatientsPage() {
         ) : (
           <div className="divide-y divide-[hsl(var(--border))]">
             {/* Table header */}
-            <div className="grid grid-cols-[1fr_80px_80px_160px_100px_40px_40px] gap-4 px-4 py-2.5 bg-[hsl(var(--muted))] text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide">
+            <div className="grid grid-cols-[1fr_80px_80px_160px_100px_40px_40px] gap-4 px-4 py-2.5 bg-[hsl(var(--table-header))] text-xs font-bold text-[hsl(var(--foreground))] uppercase tracking-wider border-b border-[hsl(var(--border))]">
               <span>Paciente</span>
               <span>Edad</span>
               <span>Sexo</span>
@@ -303,10 +328,10 @@ export default function PatientsPage() {
                 <Link
                   key={p._id}
                   href={`/patients/${p._id}`}
-                  className="grid grid-cols-[1fr_80px_80px_160px_100px_40px_40px] gap-4 px-4 py-3 items-center hover:bg-[hsl(var(--muted))] transition-colors group"
+                  className="grid grid-cols-[1fr_80px_80px_160px_100px_40px_40px] gap-4 px-4 py-3 items-center hover:bg-[hsl(var(--surface-hover))] transition-colors group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
                       <span className="text-[hsl(var(--primary))] text-xs font-semibold">
                         {initials}
                       </span>
@@ -559,15 +584,41 @@ export default function PatientsPage() {
             </div>
 
             {/* 24hr recall */}
-            <div className="space-y-1.5">
-              <Label htmlFor="recall24h">Recordatorio alimentario 24hr</Label>
-              <Textarea
-                id="recall24h"
-                {...register("recall24h")}
-                rows={3}
-                placeholder={"Desayuno: 2 huevos, tortillas...\nComida: arroz, frijoles, pollo...\nCena: sopa, pan..."}
-                className="text-sm"
-              />
+            <div className="space-y-2">
+              <div>
+                <Label>Recordatorio alimentario 24hr</Label>
+                <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+                  ¿Qué comió ayer? Ayuda a la IA a personalizar el plan nutricional.
+                </p>
+              </div>
+              {[
+                { key: "desayuno", label: "Desayuno", icon: Sun, placeholder: "Ej: 2 huevos con tortillas, café..." },
+                { key: "colAm", label: "Colación AM", icon: Apple, placeholder: "Ej: fruta, yogurt..." },
+                { key: "comida", label: "Comida", icon: Utensils, placeholder: "Ej: arroz, frijoles, pollo, ensalada..." },
+                { key: "colPm", label: "Colación PM", icon: Coffee, placeholder: "Ej: galletas, jugo..." },
+                { key: "cena", label: "Cena", icon: Moon, placeholder: "Ej: sopa, pan, leche..." },
+              ].map(({ key, label, icon: Icon, placeholder }) => (
+                <div key={key} className="flex gap-2 items-start">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--muted))] mt-0.5">
+                    <Icon className="h-3.5 w-3.5 text-[hsl(var(--muted-foreground))]" />
+                  </div>
+                  <div className="flex-1 space-y-0.5">
+                    <p className="text-xs font-medium text-[hsl(var(--muted-foreground))]">{label}</p>
+                    <Textarea
+                      rows={1}
+                      value={newRecallFields[key as keyof typeof newRecallFields]}
+                      onChange={(e) => updateNewRecallField(key, e.target.value)}
+                      onInput={(e) => {
+                        const el = e.currentTarget;
+                        el.style.height = "auto";
+                        el.style.height = el.scrollHeight + "px";
+                      }}
+                      placeholder={placeholder}
+                      className="text-sm resize-none overflow-hidden min-h-[32px]"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Notes */}
@@ -587,7 +638,7 @@ export default function PatientsPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Registrar paciente
@@ -857,7 +908,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleParse}
                 disabled={!rawText.trim()}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 Continuar →
               </Button>
@@ -921,7 +972,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleValidate}
                 disabled={!mapping["name"] || !mapping["sex"] || !mapping["heightCm"] || !mapping["weightKg"]}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 Validar datos →
               </Button>
@@ -986,7 +1037,7 @@ function ImportPatientsDialog({
               <Button
                 onClick={handleImport}
                 disabled={validRows.length === 0 || importing}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {importing && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Importar {validRows.length} paciente{validRows.length !== 1 ? "s" : ""}

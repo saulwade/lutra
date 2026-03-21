@@ -336,7 +336,7 @@ export function HistoriaClinicaTab({ patientId }: Props) {
 
 function Section({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <Card className="bg-white border-[hsl(var(--border))]">
+    <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           {icon}

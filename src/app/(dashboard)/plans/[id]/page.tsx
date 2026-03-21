@@ -29,6 +29,8 @@ import {
   Coffee,
   Moon,
   Apple,
+  History,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,9 +51,9 @@ import { useRouter } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-700",
-  draft: "bg-yellow-100 text-yellow-700",
-  archived: "bg-gray-100 text-gray-600",
+  active:   "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
+  draft:    "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] border border-[hsl(var(--border))]",
+  archived: "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))]",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -61,11 +63,11 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const MEAL_COLORS: Record<string, string> = {
-  Desayuno: "bg-amber-50 border-amber-200",
-  "Colación AM": "bg-green-50 border-green-200",
-  Comida: "bg-blue-50 border-blue-200",
-  "Colación PM": "bg-teal-50 border-teal-200",
-  Cena: "bg-purple-50 border-purple-200",
+  Desayuno:      "bg-[hsl(var(--warm-cream))] border-[hsl(var(--border))]",
+  "Colación AM": "bg-[hsl(var(--accent))] border-[hsl(var(--border))]",
+  Comida:        "bg-[hsl(var(--surface))] border-[hsl(var(--border))]",
+  "Colación PM": "bg-[hsl(var(--muted))] border-[hsl(var(--border))]",
+  Cena:          "bg-[hsl(var(--warm-cream))] border-[hsl(var(--border))]",
 };
 
 const PRESET_MEALS = ["Desayuno", "Colación AM", "Comida", "Colación PM", "Cena"];
@@ -169,9 +171,15 @@ export default function PlanDetailPage({
   const [savingEquivs, setSavingEquivs] = useState(false);
   const [distEdits, setDistEdits] = useState<Record<string, number[]> | null>(null);
   const [savingDist, setSavingDist] = useState(false);
+  const [savingVersion, setSavingVersion] = useState(false);
+  const [versionLabel, setVersionLabel] = useState("");
+  const [showVersionForm, setShowVersionForm] = useState(false);
 
   const plan = useQuery(api.plans.getPlan, { planId });
   const nutritionist = useQuery(api.nutritionists.getCurrentNutritionist);
+  const planVersions = useQuery(api.planVersions.getByPlan, { planId });
+  const saveVersion = useMutation(api.planVersions.save);
+  const deleteVersion = useMutation(api.planVersions.remove);
   const createMeal = useMutation(api.meals.createMeal);
   const deleteMealMutation = useMutation(api.meals.deleteMeal);
   const addFoodToMeal = useMutation(api.meals.addFoodToMeal);
@@ -179,6 +187,12 @@ export default function PlanDetailPage({
   const saveAsTemplateMutation = useMutation(api.plans.saveAsTemplate);
   const deletePlanMutation = useMutation(api.plans.deletePlan);
   const updatePlanMutation = useMutation(api.plans.updatePlan);
+
+  // Patient pathologies (for glycemic control flag, etc.)
+  const patientPathologies = useQuery(
+    api.patientPathologies.getByPatient,
+    plan?.patientId ? { patientId: plan.patientId } : "skip"
+  );
 
   async function handleAddMeal(name: string) {
     if (!name.trim()) return;
@@ -276,6 +290,37 @@ export default function PlanDetailPage({
     } catch {
       toast({ title: "Error al eliminar plan", variant: "destructive" });
       setDeleting(false);
+    }
+  }
+
+  async function handleSaveVersion() {
+    if (!plan) return;
+    setSavingVersion(true);
+    try {
+      const allF = plan.meals?.flatMap((m: any) => m.foods ?? []) ?? [];
+      await saveVersion({
+        planId,
+        patientId: plan.patientId ?? undefined,
+        date: new Date().toISOString().slice(0, 10),
+        label: versionLabel.trim() || undefined,
+        targetCalories: plan.targetCalories,
+        targetProteinG: plan.targetProteinG,
+        targetFatG: plan.targetFatG,
+        targetCarbsG: plan.targetCarbsG,
+        equivalentsSnapshot: plan.equivalentsPerDay ?? undefined,
+        distributionSnapshot: plan.distributionPerMeal ?? undefined,
+        actualCalories: allF.reduce((s: number, f: any) => s + (f.calories ?? 0), 0),
+        actualProteinG: allF.reduce((s: number, f: any) => s + (f.proteinG ?? 0), 0),
+        actualFatG: allF.reduce((s: number, f: any) => s + (f.fatG ?? 0), 0),
+        actualCarbsG: allF.reduce((s: number, f: any) => s + (f.carbsG ?? 0), 0),
+      });
+      toast({ title: "Versión guardada" });
+      setVersionLabel("");
+      setShowVersionForm(false);
+    } catch {
+      toast({ title: "Error al guardar versión", variant: "destructive" });
+    } finally {
+      setSavingVersion(false);
     }
   }
 
@@ -531,7 +576,7 @@ export default function PlanDetailPage({
             size="sm"
             onClick={handleDownloadPDF}
             disabled={downloadingPdf}
-            className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
           >
             {downloadingPdf
               ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -578,7 +623,7 @@ export default function PlanDetailPage({
       </div>
 
       {/* Nutritional targets */}
-      <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4">
+      <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4">
         <div className="flex items-center gap-2 mb-4">
           <Target className="w-4 h-4 text-[hsl(var(--primary))]" />
           <h2 className="text-sm font-semibold">Distribución Nutricional</h2>
@@ -600,6 +645,34 @@ export default function PlanDetailPage({
         </div>
       </div>
 
+      {/* Glycemic Control Banner */}
+      {patientPathologies?.glycemicControl && (
+        <div className="flex items-start gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--warm-cream))] p-4">
+          <span className="text-[hsl(var(--slate-ui))] text-lg">💧</span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Control glucémico activo</p>
+            <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+              Este paciente tiene control glucémico activado
+              {patientPathologies.conditions?.some((c) => c.toLowerCase().includes("diabetes")) && " (Diabetes registrada)"}.
+              Prioriza cereales de bajo índice glucémico, incluye leguminosas en cada tiempo y limita azúcares simples.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              {[
+                { label: "HC objetivo", val: `${Math.round(plan.targetCarbsG)}g/día`, hint: `${plan.targetCarbsPct}% del VCT` },
+                { label: "Equiv. cereales/día", val: `${(getEquivs()["cerealesSinGrasa"] ?? 0) + (getEquivs()["cerealesConGrasa"] ?? 0)} equiv.` },
+                { label: "Equiv. leguminosas", val: `${getEquivs()["leguminosas"] ?? 0} equiv.` },
+                { label: "Equiv. azúcares", val: `${(getEquivs()["azucaresSinGrasa"] ?? 0) + (getEquivs()["azucaresConGrasa"] ?? 0)} equiv.` },
+              ].map((item) => (
+                <span key={item.label} className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-lg px-2 py-1 text-[hsl(var(--foreground))]">
+                  <span className="font-medium">{item.label}:</span> {item.val}
+                  {item.hint && <span className="opacity-70 ml-1">({item.hint})</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SMAE Equivalents section — editable */}
       {(() => {
         const equivs = getEquivs();
@@ -609,7 +682,7 @@ export default function PlanDetailPage({
         const totalL    = Object.entries(equivs).reduce((s, [k, v]) => s + (SMAE_META[k]?.l   ?? 0) * v, 0);
         const totalHC   = Object.entries(equivs).reduce((s, [k, v]) => s + (SMAE_META[k]?.hc  ?? 0) * v, 0);
         return (
-          <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4">
+          <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <ListChecks className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -632,7 +705,7 @@ export default function PlanDetailPage({
                     size="sm"
                     onClick={handleSaveEquivs}
                     disabled={savingEquivs}
-                    className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-7 text-xs"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-7 text-xs"
                   >
                     {savingEquivs && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                     Guardar cambios
@@ -643,13 +716,13 @@ export default function PlanDetailPage({
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-[hsl(var(--muted-foreground))] border-b border-[hsl(var(--border))]">
-                    <th className="text-left pb-2 font-medium">Grupo</th>
-                    <th className="text-center pb-2 font-medium w-32">Equivalentes</th>
-                    <th className="text-right pb-2 font-medium">Kcal</th>
-                    <th className="text-right pb-2 font-medium">P (g)</th>
-                    <th className="text-right pb-2 font-medium">L (g)</th>
-                    <th className="text-right pb-2 font-medium">HC (g)</th>
+                  <tr className="bg-[hsl(var(--table-header))] text-[hsl(var(--foreground))] border-b border-[hsl(var(--border))]">
+                    <th className="text-left pb-2 pt-2 px-1 font-bold uppercase tracking-wider text-[11px]">Grupo</th>
+                    <th className="text-center pb-2 pt-2 font-bold uppercase tracking-wider text-[11px] w-32">Equivalentes</th>
+                    <th className="text-right pb-2 pt-2 font-bold uppercase tracking-wider text-[11px]">Kcal</th>
+                    <th className="text-right pb-2 pt-2 font-bold uppercase tracking-wider text-[11px]">P (g)</th>
+                    <th className="text-right pb-2 pt-2 font-bold uppercase tracking-wider text-[11px]">L (g)</th>
+                    <th className="text-right pb-2 pt-2 font-bold uppercase tracking-wider text-[11px]">HC (g)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -682,7 +755,7 @@ export default function PlanDetailPage({
                               "inline-flex items-center justify-center w-9 h-6 rounded font-semibold text-sm",
                               isDirty && equivs[key] !== ((plan.equivalentsPerDay as any)?.[key] ?? 0)
                                 ? "bg-yellow-100 text-yellow-700"
-                                : "bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))]"
+                                : "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
                             )}>
                               {n}
                             </span>
@@ -732,13 +805,14 @@ export default function PlanDetailPage({
         const savedDist = plan?.distributionPerMeal as Record<string, number[]> | undefined;
 
         return (
-          <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ListChecks className="w-4 h-4 text-[hsl(var(--primary))]" />
-                <h2 className="text-sm font-semibold">Distribución por Tiempo de Comida</h2>
+                <h2 className="text-sm font-semibold text-[hsl(var(--text-strong))]">Distribución por Tiempo de Comida</h2>
                 {isDistDirty && (
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-medium">
                     Sin guardar
                   </span>
                 )}
@@ -755,30 +829,36 @@ export default function PlanDetailPage({
                     size="sm"
                     onClick={handleSaveDist}
                     disabled={savingDist}
-                    className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-7 text-xs"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-7 text-xs"
                   >
                     {savingDist && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
-                    Guardar cambios
+                    Guardar
                   </Button>
                 </div>
               )}
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+
+            {/* Table */}
+            <div className="overflow-x-auto rounded-lg border border-[hsl(var(--border))]">
+              <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="text-[hsl(var(--muted-foreground))] border-b border-[hsl(var(--border))]">
-                    <th className="text-left pb-2 font-medium">Grupo</th>
-                    <th className="text-center pb-2 font-medium">Total</th>
+                  <tr className="bg-[hsl(var(--table-header))] text-[hsl(var(--foreground))] sticky top-0 z-10">
+                    <th className="text-left py-2 px-3 font-bold uppercase tracking-wider text-[11px] border-b border-[hsl(var(--border))] w-28">
+                      Grupo
+                    </th>
+                    <th className="text-center py-2 px-2 font-bold uppercase tracking-wider text-[11px] border-b border-[hsl(var(--border))] w-16">
+                      Total
+                    </th>
                     {PRESET_MEALS.map((name, i) => {
                       const mi = MEAL_ICONS[name];
                       const Icon = mi?.icon ?? Utensils;
                       return (
-                        <th key={name} className="text-center pb-2 font-medium px-1">
+                        <th key={name} className="py-1.5 px-2 border-b border-[hsl(var(--border))] text-center">
                           <div className="flex flex-col items-center gap-0.5">
-                            <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: mi?.bg ?? "#f1f5f4" }}>
-                              <Icon className="w-3 h-3" style={{ color: mi?.accent ?? "#8D957E" }} />
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: mi?.bg ?? "#f1f5f4" }}>
+                              <Icon className="w-3.5 h-3.5" style={{ color: mi?.accent ?? "#8D957E" }} />
                             </div>
-                            <span className="text-[10px]">{MEAL_NAMES_SHORT[i]}</span>
+                            <span className="text-[10px] font-semibold tracking-tight">{MEAL_NAMES_SHORT[i]}</span>
                           </div>
                         </th>
                       );
@@ -786,51 +866,76 @@ export default function PlanDetailPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {DIST_GROUPS.map(grp => {
+                  {DIST_GROUPS.map((grp, rowIdx) => {
                     const total = getGroupTotal(grp.smaeKeys, equivs);
                     if (total === 0) return null;
                     const vals = dist[grp.key] ?? [0, 0, 0, 0, 0];
                     const rowSum = vals.reduce((s, v) => s + v, 0);
+                    const diff = Math.abs(rowSum - total);
+                    const isBalanced = diff <= 0.4;
+                    const isOver = rowSum > total + 0.4;
                     return (
-                      <tr key={grp.key} className="border-b border-[hsl(var(--border))]/50 last:border-0">
-                        <td className="py-1.5">
+                      <tr
+                        key={grp.key}
+                        className={cn(
+                          "border-b border-[hsl(var(--border))]/60 last:border-0 transition-colors",
+                          rowIdx % 2 === 1 ? "bg-[hsl(var(--muted))]/30" : ""
+                        )}
+                      >
+                        {/* Group name */}
+                        <td className="py-1.5 px-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: GROUP_DOT[grp.smaeKeys[0]] ?? "#cbd5e1" }} />
-                            <span className="font-medium">{grp.label}</span>
+                            <div
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: GROUP_DOT[grp.smaeKeys[0]] ?? "#cbd5e1" }}
+                            />
+                            <span className="font-semibold text-[hsl(var(--foreground))]">{grp.label}</span>
                           </div>
                         </td>
-                        <td className="py-1.5 text-center">
+
+                        {/* Total column — validation badge */}
+                        <td className="py-1.5 px-2 text-center">
                           <span className={cn(
-                            "font-semibold",
-                            Math.abs(rowSum - total) > 0.4 ? "text-red-600" : "text-green-600"
+                            "inline-flex items-center justify-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-md",
+                            isBalanced
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+                              : isOver
+                                ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                                : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
                           )}>
                             {rowSum}
+                            <span className="font-normal text-[10px] opacity-70">/{total}</span>
                           </span>
-                          <span className="text-[hsl(var(--muted-foreground))]">/{total}</span>
                         </td>
+
+                        {/* Meal cells */}
                         {vals.map((val, mIdx) => {
                           const savedVal = savedDist?.[grp.key]?.[mIdx];
                           const isChanged = isDistDirty && savedVal !== undefined && val !== savedVal;
                           return (
-                            <td key={mIdx} className="py-1.5 px-0.5">
+                            <td key={mIdx} className="py-1 px-1">
                               <div className="flex items-center justify-center gap-0.5">
                                 <button
                                   onClick={() => changeDist(grp.key, mIdx, -0.5)}
-                                  className="w-5 h-5 rounded flex items-center justify-center border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] font-bold leading-none transition-colors"
+                                  className="w-4 h-4 rounded flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] text-[11px] leading-none transition-colors"
+                                  aria-label="Reducir"
                                 >
                                   −
                                 </button>
                                 <span className={cn(
-                                  "inline-flex items-center justify-center w-8 h-6 rounded font-semibold text-sm",
+                                  "inline-flex items-center justify-center w-7 h-5 rounded text-xs font-semibold tabular-nums",
                                   isChanged
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))]"
+                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                    : val > 0
+                                      ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
+                                      : "text-[hsl(var(--muted-foreground))]"
                                 )}>
-                                  {val}
+                                  {val > 0 ? val : "·"}
                                 </span>
                                 <button
                                   onClick={() => changeDist(grp.key, mIdx, 0.5)}
-                                  className="w-5 h-5 rounded flex items-center justify-center border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] font-bold leading-none transition-colors"
+                                  className="w-4 h-4 rounded flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] text-[11px] leading-none transition-colors"
+                                  aria-label="Aumentar"
                                 >
                                   +
                                 </button>
@@ -844,15 +949,15 @@ export default function PlanDetailPage({
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-[hsl(var(--muted-foreground))] mt-3">
-              Total/columna = equivalentes que van a cada tiempo de comida. El número debe coincidir con el total del grupo.
+            <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-2">
+              Ajusta cuántos equivalentes de cada grupo van a cada tiempo de comida. El total debe coincidir con los equivalentes del plan.
             </p>
           </div>
         );
       })()}
 
       {/* Notas del nutriólogo */}
-      <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4">
+      <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4">
         <div className="flex items-center gap-2 mb-3">
           <StickyNote className="w-4 h-4 text-[hsl(var(--primary))]" />
           <h2 className="text-sm font-semibold">Notas del nutriólogo</h2>
@@ -870,7 +975,7 @@ export default function PlanDetailPage({
               size="sm"
               onClick={handleSaveNotes}
               disabled={savingNotes}
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-8"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-8"
             >
               {savingNotes && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               Guardar notas
@@ -909,7 +1014,7 @@ export default function PlanDetailPage({
 
         {/* Add meal section */}
         {showAddMeal ? (
-          <div className="rounded-xl border border-dashed border-[hsl(var(--border))] bg-white p-4 flex flex-col gap-3">
+          <div className="rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 flex flex-col gap-3">
             <p className="text-sm font-medium">Nuevo tiempo de comida</p>
             {availablePresets.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -936,7 +1041,7 @@ export default function PlanDetailPage({
                 size="sm"
                 onClick={() => handleAddMeal(customMealName)}
                 disabled={!customMealName.trim()}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-8"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-8"
               >
                 Agregar
               </Button>
@@ -959,6 +1064,88 @@ export default function PlanDetailPage({
             Agregar tiempo de comida
           </button>
         )}
+
+        {/* ── Version History ───────────────────────────────────────────── */}
+        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border))]">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <History className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+              Historial de versiones
+            </h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowVersionForm((v) => !v)}
+              className="h-7 text-xs"
+            >
+              <Save className="w-3 h-3 mr-1" />
+              Guardar versión actual
+            </Button>
+          </div>
+
+          {showVersionForm && (
+            <div className="px-4 py-3 border-b border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)] flex items-center gap-2">
+              <input
+                type="text"
+                value={versionLabel}
+                onChange={(e) => setVersionLabel(e.target.value)}
+                placeholder="Etiqueta opcional (ej. Semana 3)"
+                className="flex-1 h-8 px-3 text-sm rounded-lg border border-[hsl(var(--border))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.3)] bg-[hsl(var(--surface))]"
+                onKeyDown={(e) => e.key === "Enter" && handleSaveVersion()}
+              />
+              <Button size="sm" onClick={handleSaveVersion} disabled={savingVersion} className="h-8">
+                {savingVersion ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Guardar"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowVersionForm(false)} className="h-8">
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          )}
+
+          <div className="divide-y divide-[hsl(var(--border))]">
+            {planVersions === undefined && (
+              <div className="px-4 py-3 text-xs text-[hsl(var(--muted-foreground))]">Cargando...</div>
+            )}
+            {planVersions?.length === 0 && (
+              <div className="px-4 py-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
+                Sin versiones guardadas. Guarda una instantánea del plan para consultar el historial.
+              </div>
+            )}
+            {planVersions?.map((v: any) => (
+              <div key={v._id} className="flex items-center justify-between px-4 py-3 hover:bg-[hsl(var(--muted)/0.3)] transition-colors">
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="font-mono text-xs text-[hsl(var(--muted-foreground))] tabular-nums">{v.date}</span>
+                  {v.label && <span className="font-medium">{v.label}</span>}
+                  <span className="text-[hsl(var(--muted-foreground))] text-xs">
+                    {Math.round(v.targetCalories)} kcal objetivo
+                    {v.actualCalories ? ` · ${Math.round(v.actualCalories)} kcal real` : ""}
+                  </span>
+                  {v.actualCalories && v.targetCalories > 0 && (
+                    <span className={cn(
+                      "text-xs font-semibold px-1.5 py-0.5 rounded-full",
+                      (() => {
+                        const pct = (v.actualCalories / v.targetCalories) * 100;
+                        return pct >= 90 && pct <= 110
+                          ? "bg-green-100 text-green-700"
+                          : pct >= 70
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-orange-100 text-orange-700";
+                      })()
+                    )}>
+                      {Math.round((v.actualCalories / v.targetCalories) * 100)}%
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => deleteVersion({ versionId: v._id })}
+                  className="text-[hsl(var(--muted-foreground))] hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1036,7 +1223,7 @@ function MealSection({
   const dayPct = dayActualCalories && dayActualCalories > 0 ? Math.round((totalCal / dayActualCalories) * 100) : null;
 
   return (
-    <div className="rounded-xl border border-[hsl(var(--border))] bg-white overflow-hidden">
+    <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] overflow-hidden">
       {/* Meal header */}
       <div className="flex items-center gap-3 p-4">
         {/* Meal-time icon */}
@@ -1062,9 +1249,9 @@ function MealSection({
 
           {/* Macro chips + actions */}
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">P {Math.round(totalProt)}g</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700">L {Math.round(totalFat)}g</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">HC {Math.round(totalCarbs)}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[hsl(var(--muted))] text-[hsl(var(--slate-ui))]">P {Math.round(totalProt)}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))]">L {Math.round(totalFat)}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--primary))]">HC {Math.round(totalCarbs)}g</span>
             <div className="ml-auto flex items-center gap-1">
               <Button size="sm" variant="outline" className="text-xs h-7" onClick={onToggleAddFood}>
                 {isAddingFood ? <X className="w-3 h-3" /> : <><Plus className="w-3 h-3 mr-1" />Alimento</>}
@@ -1093,13 +1280,13 @@ function MealSection({
         <div className="border-t border-[hsl(var(--border))] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))]">
-                <th className="text-left px-4 py-2 font-medium">Alimento</th>
-                <th className="text-right px-2 py-2 font-medium">Cant.</th>
-                <th className="text-right px-2 py-2 font-medium font-bold">Kcal</th>
-                <th className="text-right px-2 py-2 font-medium text-blue-600">P</th>
-                <th className="text-right px-2 py-2 font-medium text-yellow-600">L</th>
-                <th className="text-right px-2 py-2 font-medium text-green-600">HC</th>
+              <tr className="text-[11px] font-bold uppercase tracking-wider text-[hsl(var(--foreground))] bg-[hsl(var(--table-header))] border-b border-[hsl(var(--border))]">
+                <th className="text-left px-4 py-2">Alimento</th>
+                <th className="text-right px-2 py-2">Cant.</th>
+                <th className="text-right px-2 py-2">Kcal</th>
+                <th className="text-right px-2 py-2">P</th>
+                <th className="text-right px-2 py-2">L</th>
+                <th className="text-right px-2 py-2">HC</th>
                 <th className="w-8 px-2 py-2" />
               </tr>
             </thead>
@@ -1112,7 +1299,7 @@ function MealSection({
                     <td className="px-4 py-2">
                       <p className="font-medium truncate max-w-[200px] text-sm">{food.name}</p>
                       {food.smaeCategory && (
-                        <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))] mt-0.5">
+                        <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--primary))] mt-0.5">
                           {food.smaeCategory}
                         </span>
                       )}
@@ -1152,14 +1339,14 @@ function AddFoodPanel({
   const [tab, setTab] = useState<"food" | "recipe">("food");
 
   return (
-    <div className="bg-white rounded-lg border border-[hsl(var(--border))] p-3 mb-3 flex flex-col gap-2">
+    <div className="bg-[hsl(var(--surface))] rounded-lg border border-[hsl(var(--border))] p-3 mb-3 flex flex-col gap-2">
       {/* Tab switcher */}
       <div className="flex gap-1 bg-[hsl(var(--muted))] rounded-md p-0.5 w-fit">
         <button
           onClick={() => setTab("food")}
           className={`flex items-center gap-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
             tab === "food"
-              ? "bg-white text-[hsl(var(--foreground))] shadow-sm"
+              ? "bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] shadow-sm"
               : "text-[hsl(var(--muted-foreground))]"
           }`}
         >
@@ -1170,7 +1357,7 @@ function AddFoodPanel({
           onClick={() => setTab("recipe")}
           className={`flex items-center gap-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
             tab === "recipe"
-              ? "bg-white text-[hsl(var(--foreground))] shadow-sm"
+              ? "bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] shadow-sm"
               : "text-[hsl(var(--muted-foreground))]"
           }`}
         >
@@ -1296,7 +1483,7 @@ function FoodSearchTab({ onAddFood }: { onAddFood: (food: any, qty: number) => P
         size="sm"
         disabled={qty <= 0 || adding}
         onClick={handleAdd}
-        className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-8 self-end"
+        className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-8 self-end"
       >
         {adding && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
         Agregar al plan
@@ -1403,7 +1590,7 @@ function RecipeTab({ onAddRecipe }: { onAddRecipe: (recipe: any, servings: numbe
         size="sm"
         disabled={servings <= 0 || adding}
         onClick={handleAdd}
-        className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] h-8 self-end"
+        className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] h-8 self-end"
       >
         {adding && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
         Agregar al plan

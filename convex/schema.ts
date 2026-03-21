@@ -356,6 +356,85 @@ export default defineSchema({
   })
     .index("by_recipe", ["recipeId"]),
 
+  // ─── NUTRITIONAL SCREENINGS (NRS, MUST, CONUT, GLIM) ─────────────
+  screenings: defineTable({
+    patientId: v.id("patients"),
+    nutritionistId: v.id("nutritionists"),
+    date: v.string(),                      // "2024-03-15"
+    tool: v.union(
+      v.literal("NRS2002"),
+      v.literal("MUST"),
+      v.literal("CONUT"),
+      v.literal("GLIM")
+    ),
+    score: v.optional(v.number()),
+    risk: v.optional(v.string()),          // "bajo"|"medio"|"alto"|"desnutricion"
+    // NRS-2002 fields
+    nrs_lowBmi: v.optional(v.boolean()),
+    nrs_weightLoss: v.optional(v.boolean()),
+    nrs_reducedIntake: v.optional(v.boolean()),
+    nrs_severeIllness: v.optional(v.boolean()),
+    nrs_age70: v.optional(v.boolean()),
+    // MUST fields
+    must_bmiScore: v.optional(v.number()),       // 0, 1, 2
+    must_weightLossScore: v.optional(v.number()),// 0, 1, 2
+    must_acuteScore: v.optional(v.number()),     // 0 or 2
+    // CONUT fields (lab values)
+    conut_albumin: v.optional(v.number()),       // g/dL
+    conut_lymphocytes: v.optional(v.number()),   // cells/mm³
+    conut_cholesterol: v.optional(v.number()),   // mg/dL
+    // GLIM fields
+    glim_weightLoss: v.optional(v.boolean()),    // phenotypic
+    glim_lowBmi: v.optional(v.boolean()),        // phenotypic
+    glim_lowMuscle: v.optional(v.boolean()),     // phenotypic
+    glim_reducedIntake: v.optional(v.boolean()), // etiologic
+    glim_inflammation: v.optional(v.boolean()),  // etiologic
+    glim_severity: v.optional(v.string()),       // "moderada"|"severa"
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_patient", ["patientId"])
+    .index("by_patient_date", ["patientId", "date"])
+    .index("by_patient_tool", ["patientId", "tool"]),
+
+  // ─── PLAN VERSIONS (snapshots) ────────────────────────────────────
+  planVersions: defineTable({
+    planId: v.id("plans"),
+    patientId: v.optional(v.id("patients")),
+    nutritionistId: v.id("nutritionists"),
+    date: v.string(),                      // "2024-03-15"
+    label: v.optional(v.string()),         // "Semana 3 revisión"
+    // Snapshot of plan targets at save time
+    targetCalories: v.number(),
+    targetProteinG: v.number(),
+    targetFatG: v.number(),
+    targetCarbsG: v.number(),
+    equivalentsSnapshot: v.optional(v.any()),
+    distributionSnapshot: v.optional(v.any()),
+    // Nutritional adequacy summary at save time
+    actualCalories: v.optional(v.number()),
+    actualProteinG: v.optional(v.number()),
+    actualFatG: v.optional(v.number()),
+    actualCarbsG: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_plan", ["planId"])
+    .index("by_patient", ["patientId"]),
+
+  // ─── PATHOLOGIES & RECOMMENDATIONS ───────────────────────────────
+  patientPathologies: defineTable({
+    patientId: v.id("patients"),
+    nutritionistId: v.id("nutritionists"),
+    conditions: v.array(v.string()),       // ["Diabetes T2", "HTA", "Dislipidemia"]
+    supplements: v.optional(v.string()),   // Indicaciones de suplementos
+    clinicalRecommendations: v.optional(v.string()),
+    glycemicControl: v.optional(v.boolean()),  // activar lógica glucémica
+    dietType: v.optional(v.string()),      // "hiposódica"|"hipolipídica"|"diabética"|etc
+    updatedAt: v.number(),
+  })
+    .index("by_patient", ["patientId"]),
+
   // ─── FOOD SEARCH CACHE (for future external API integration) ──────
   foodSearchCache: defineTable({
     query: v.string(),

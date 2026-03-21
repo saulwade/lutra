@@ -29,23 +29,23 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 25;
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Verduras: "bg-green-100 text-green-700",
-  Frutas: "bg-orange-100 text-orange-700",
-  "Cereales y tubérculos sin grasa": "bg-yellow-100 text-yellow-700",
-  "Cereales y tubérculos con grasa": "bg-amber-100 text-amber-700",
-  Leguminosas: "bg-lime-100 text-lime-700",
-  "AOA muy baja grasa": "bg-blue-100 text-blue-700",
-  "AOA baja grasa": "bg-sky-100 text-sky-700",
-  "AOA moderada grasa": "bg-cyan-100 text-cyan-700",
-  "AOA alta grasa": "bg-indigo-100 text-indigo-700",
-  "Leche descremada": "bg-purple-100 text-purple-700",
-  "Leche semidescremada": "bg-violet-100 text-violet-700",
-  "Leche entera": "bg-fuchsia-100 text-fuchsia-700",
-  "Leche con azúcar": "bg-pink-100 text-pink-700",
-  "Aceites y grasas sin proteína": "bg-red-100 text-red-700",
-  "Aceites y grasas con proteína": "bg-rose-100 text-rose-700",
-  "Azúcares sin grasa": "bg-teal-100 text-teal-700",
-  "Azúcares con grasa": "bg-emerald-100 text-emerald-700",
+  Verduras: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
+  Frutas: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+  "Cereales y tubérculos sin grasa": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+  "Cereales y tubérculos con grasa": "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  Leguminosas: "bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300",
+  "AOA muy baja grasa": "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  "AOA baja grasa": "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+  "AOA moderada grasa": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+  "AOA alta grasa": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  "Leche descremada": "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+  "Leche semidescremada": "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+  "Leche entera": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300",
+  "Leche con azúcar": "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
+  "Aceites y grasas sin proteína": "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  "Aceites y grasas con proteína": "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+  "Azúcares sin grasa": "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
+  "Azúcares con grasa": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
 };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -154,7 +154,7 @@ export default function FoodsPage() {
       </div>
 
       {/* Food Table */}
-      <div className="bg-white rounded-xl border border-[hsl(var(--border))] overflow-hidden">
+      <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] overflow-hidden">
         {isLoading ? (
           <FoodTableSkeleton />
         ) : foods?.length === 0 ? (
@@ -197,7 +197,7 @@ export default function FoodsPage() {
                       <span
                         className={cn(
                           "text-xs px-2 py-0.5 rounded-full font-medium",
-                          CATEGORY_COLORS[food.category] ?? "bg-gray-100 text-gray-600"
+                          CATEGORY_COLORS[food.category] ?? "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
                         )}
                       >
                         {food.category}
@@ -256,21 +256,21 @@ function FoodDetailDialog({
           <DialogTitle>{food.name}</DialogTitle>
         </DialogHeader>
         {/* Top banner */}
-        <div className="bg-[hsl(81,10%,97%)] px-6 pt-6 pb-5 rounded-t-xl">
+        <div className="bg-[hsl(var(--accent))] px-6 pt-6 pb-5 rounded-t-xl">
           <div className="flex items-start justify-between gap-3 mb-3">
             <span
               className={cn(
                 "text-xs px-2.5 py-1 rounded-full font-medium",
-                CATEGORY_COLORS[food.category] ?? "bg-gray-100 text-gray-600"
+                CATEGORY_COLORS[food.category] ?? "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
               )}
             >
               {food.category}
             </span>
           </div>
-          <h2 className="text-xl font-bold text-[hsl(222,47%,11%)] leading-tight mb-1">
+          <h2 className="text-xl font-bold text-[hsl(var(--text-strong))] leading-tight mb-1">
             {food.name}
           </h2>
-          <p className="text-sm text-[hsl(215,16%,47%)]">
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
             Porción: {food.servingAmount} {food.servingUnit}
             {food.servingWeightG && ` (${food.servingWeightG} g neto)`}
             {food.grossWeightG && food.grossWeightG !== food.servingWeightG
@@ -281,12 +281,12 @@ function FoodDetailDialog({
 
         <div className="px-6 pb-6 flex flex-col gap-5 mt-4">
           {/* Calorie hero */}
-          <div className="flex items-center justify-between bg-white border border-[hsl(var(--border))] rounded-xl px-5 py-4">
+          <div className="flex items-center justify-between bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl px-5 py-4">
             <div>
-              <p className="text-3xl font-extrabold text-[hsl(222,47%,11%)]">
+              <p className="text-3xl font-extrabold text-[hsl(var(--text-strong))]">
                 {food.calories}
               </p>
-              <p className="text-sm text-[hsl(215,16%,47%)] mt-0.5">
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">
                 Kilocalorías
               </p>
             </div>
@@ -298,21 +298,21 @@ function FoodDetailDialog({
                   value={food.proteinG}
                   total={totalMacroG}
                   color="bg-blue-500"
-                  textColor="text-blue-600"
+                  textColor="text-blue-600 dark:text-blue-400"
                 />
                 <MacroPill
                   label="Lípidos"
                   value={food.fatG}
                   total={totalMacroG}
                   color="bg-yellow-400"
-                  textColor="text-yellow-600"
+                  textColor="text-yellow-600 dark:text-yellow-400"
                 />
                 <MacroPill
                   label="Hidratos"
                   value={food.carbsG}
                   total={totalMacroG}
-                  color="bg-[hsl(81,10%,54%)]"
-                  textColor="text-[hsl(81,10%,54%)]"
+                  color="bg-[hsl(var(--primary))]"
+                  textColor="text-[hsl(var(--primary))]"
                 />
               </div>
             )}
@@ -396,7 +396,7 @@ function FoodDetailDialog({
           )}
 
           {/* Source badge */}
-          <p className="text-xs text-[hsl(215,16%,47%)] text-center pt-1">
+          <p className="text-xs text-[hsl(var(--muted-foreground))] text-center pt-1">
             Fuente: {food.source === "smae" ? "Sistema Mexicano de Alimentos Equivalentes (SMAE)" : food.source}
           </p>
         </div>
@@ -423,7 +423,7 @@ function MacroPill({
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-[hsl(215,16%,47%)] w-16 text-right">{label}</span>
+      <span className="text-xs text-[hsl(var(--muted-foreground))] w-16 text-right">{label}</span>
       <div className="w-24 h-2 bg-[hsl(var(--muted))] rounded-full overflow-hidden">
         <div
           className={cn("h-full rounded-full", color)}
@@ -446,10 +446,10 @@ function Section({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(215,16%,47%)] mb-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))] mb-2">
         {title}
       </p>
-      <div className="bg-white border border-[hsl(var(--border))] rounded-xl overflow-hidden divide-y divide-[hsl(var(--border))]">
+      <div className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl overflow-hidden divide-y divide-[hsl(var(--border))]">
         {children}
       </div>
     </div>
@@ -478,16 +478,16 @@ function NutrientRow({
     >
       <span
         className={cn(
-          "text-[hsl(222,47%,11%)]",
+          "text-[hsl(var(--foreground))]",
           bold ? "font-semibold" : "font-normal",
-          indent && "text-[hsl(215,16%,47%)]"
+          indent && "text-[hsl(var(--muted-foreground))]"
         )}
       >
         {label.replace(/^  /, "")}
       </span>
-      <span className={cn("tabular-nums", bold ? "font-semibold" : "font-normal")}>
+      <span className={cn("tabular-nums text-[hsl(var(--foreground))]", bold ? "font-semibold" : "font-normal")}>
         {typeof value === "number" ? value : "—"}
-        {unit && <span className="text-[hsl(215,16%,47%)] ml-1 text-xs">{unit}</span>}
+        {unit && <span className="text-[hsl(var(--muted-foreground))] ml-1 text-xs">{unit}</span>}
       </span>
     </div>
   );
@@ -552,7 +552,7 @@ function Pagination({
             className={cn(
               "w-8 h-8 text-sm",
               p === currentPage &&
-                "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                "bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
             )}
             onClick={() => onPageChange(p as number)}
           >

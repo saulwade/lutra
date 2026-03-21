@@ -273,7 +273,7 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
 
       {/* ── Next appointments ── */}
       {nextAppointments.length > 0 && (
-        <Card className="bg-white border-[hsl(var(--border))]">
+        <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <CalendarClock className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -308,10 +308,67 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
         </Button>
       </div>
 
+      {/* ── Comparative summary ── */}
+      {consultations.length >= 2 && (() => {
+        const first = sorted[0];
+        const last  = sorted[sorted.length - 1];
+        const metrics: { label: string; firstVal?: number; lastVal?: number; unit: string; lowerIsBetter: boolean }[] = [
+          { label: "Peso",           firstVal: first.weightKg,    lastVal: last.weightKg,    unit: "kg", lowerIsBetter: true },
+          { label: "Grasa corporal", firstVal: first.bodyFatPct,  lastVal: last.bodyFatPct,  unit: "%",  lowerIsBetter: true },
+          { label: "Masa muscular",  firstVal: first.muscleMassKg,lastVal: last.muscleMassKg,unit: "kg", lowerIsBetter: false },
+          { label: "Cintura",        firstVal: first.waistCm,     lastVal: last.waistCm,     unit: "cm", lowerIsBetter: true },
+        ].filter((m) => m.firstVal != null && m.lastVal != null);
+        if (metrics.length === 0) return null;
+        return (
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[hsl(var(--primary))]" />
+                Comparativo: primera vs última consulta
+                <span className="text-xs font-normal text-[hsl(var(--muted-foreground))]">
+                  ({first.date} → {last.date})
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {metrics.map((m) => {
+                  const delta = (m.lastVal! - m.firstVal!);
+                  const pct   = m.firstVal! > 0 ? ((delta / m.firstVal!) * 100) : 0;
+                  const improved = m.lowerIsBetter ? delta < 0 : delta > 0;
+                  const neutral  = Math.abs(delta) < 0.05;
+                  return (
+                    <div key={m.label} className="rounded-xl border border-[hsl(var(--border))] p-3 space-y-1">
+                      <p className="text-xs text-[hsl(var(--muted-foreground))] font-medium">{m.label}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-xl font-bold tabular-nums">{m.lastVal}{m.unit}</span>
+                      </div>
+                      <div className={cn(
+                        "inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full",
+                        neutral ? "bg-gray-100 text-gray-600"
+                          : improved ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      )}>
+                        {!neutral && (delta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />)}
+                        {delta > 0 ? "+" : ""}{delta.toFixed(1)}{m.unit}
+                        <span className="opacity-70">({pct > 0 ? "+" : ""}{pct.toFixed(1)}%)</span>
+                      </div>
+                      <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                        Inicio: {m.firstVal}{m.unit}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* ── Charts ── */}
       {consultations.length >= 2 && (
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Card className="bg-white border-[hsl(var(--border))]">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide">Peso (kg)</CardTitle>
             </CardHeader>
@@ -319,7 +376,7 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
               <LineChart data={weightData} color="#8D957E" />
             </CardContent>
           </Card>
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide">Grasa corporal (%)</CardTitle>
             </CardHeader>
@@ -327,7 +384,7 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
               <LineChart data={fatData} color="#F59E0B" />
             </CardContent>
           </Card>
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide">Masa muscular (kg)</CardTitle>
             </CardHeader>
@@ -335,12 +392,26 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
               <LineChart data={muscleData} color="#6366F1" />
             </CardContent>
           </Card>
+          {(() => {
+            const waistData = sorted.filter((c) => c.waistCm).map((c) => ({ date: c.date, value: c.waistCm }));
+            if (waistData.length < 2) return null;
+            return (
+              <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide">Cintura (cm)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LineChart data={waistData} color="#EC4899" />
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       )}
 
       {/* ── Progress table ── */}
       {consultations.length > 0 ? (
-        <Card className="bg-white border-[hsl(var(--border))]">
+        <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold">Historial de visitas</CardTitle>
           </CardHeader>
@@ -357,7 +428,7 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
                 </thead>
                 <tbody>
                   {consultations.map((c, i) => (
-                    <tr key={c._id} className={cn("border-b border-[hsl(var(--border))]", i % 2 === 0 ? "bg-white" : "bg-[hsl(214,32%,99%)]")}>
+                    <tr key={c._id} className={cn("border-b border-[hsl(var(--border))]", i % 2 === 0 ? "bg-[hsl(var(--surface))]" : "bg-[hsl(214,32%,99%)]")}>
                       <td className="px-4 py-3 font-medium whitespace-nowrap">{c.date}</td>
                       <td className="px-4 py-3 text-center">{c.weightKg ?? "—"}</td>
                       <td className="px-4 py-3 text-center">{c.bodyFatPct ? `${c.bodyFatPct}%` : "—"}</td>
@@ -411,7 +482,7 @@ export function SeguimientoTab({ patientId, patientWeightKg }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-white border-[hsl(var(--border))]">
+        <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
           <CardContent className="flex flex-col items-center py-12 gap-3 text-center">
             <TrendingUp className="w-10 h-10 text-[hsl(var(--muted-foreground))] opacity-30" />
             <p className="text-sm font-medium">Sin visitas registradas</p>

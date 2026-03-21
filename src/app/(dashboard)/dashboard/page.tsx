@@ -68,48 +68,48 @@ const QUICK_ACTIONS = [
     description: "Registrar datos y calcular requerimientos",
     href: "/patients",
     icon: Users,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-[hsl(var(--primary))]",
+    bg: "bg-[hsl(var(--accent))]",
   },
   {
     label: "Calculadora energética",
     description: "GET, IMC, distribución de macros SMAE",
     href: "/calc",
     icon: Calculator,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-[hsl(var(--terracotta))]",
+    bg: "bg-[hsl(var(--warm-cream))]",
   },
   {
     label: "Generar plan con IA",
     description: "Plan SMAE personalizado en segundos",
     href: "/ai",
     icon: Sparkles,
-    color: "text-[hsl(81,10%,54%)]",
-    bg: "bg-[hsl(81,10%,94%)]",
+    color: "text-[hsl(var(--primary))]",
+    bg: "bg-[hsl(var(--accent))]",
   },
   {
     label: "Crear plan alimenticio",
     description: "Constructor manual con base SMAE",
     href: "/plans",
     icon: ClipboardList,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
+    color: "text-[hsl(var(--slate-ui))]",
+    bg: "bg-[hsl(var(--muted))]",
   },
   {
     label: "Nueva receta",
     description: "Recetas con macros calculados automáticamente",
     href: "/recipes",
     icon: ChefHat,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
+    color: "text-[hsl(var(--terracotta))]",
+    bg: "bg-[hsl(var(--warm-beige)/0.5)]",
   },
   {
     label: "Base de alimentos SMAE",
     description: "Busca y filtra 2,870+ alimentos",
     href: "/foods",
     icon: Apple,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-[hsl(var(--primary))]",
+    bg: "bg-[hsl(var(--accent))]",
   },
 ];
 
@@ -129,13 +129,69 @@ export default function DashboardPage() {
   const today = getTodayStr();
   const greeting = getGreeting();
 
+  const isFirstTime = !isLoading && (patients?.length ?? 0) === 0;
+
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
 
+      {/* ── First-time onboarding card ── */}
+      {isFirstTime && (
+        <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] overflow-hidden">
+          <div className="h-1 w-full bg-gradient-to-r from-[hsl(var(--cta))] to-[hsl(var(--primary)/0.6)]" />
+          <div className="px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))] mb-3">
+              Primeros pasos
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[
+                {
+                  step: "1",
+                  title: "Configura tu perfil",
+                  desc: "Agrega tu nombre, cédula y logo del consultorio",
+                  href: "/settings",
+                  done: false,
+                },
+                {
+                  step: "2",
+                  title: "Registra tu primer paciente",
+                  desc: "Datos clínicos, antropometría y objetivo",
+                  href: "/patients",
+                  done: false,
+                },
+                {
+                  step: "3",
+                  title: "Genera un plan con IA",
+                  desc: "Plan SMAE personalizado en menos de 1 minuto",
+                  href: "/ai",
+                  done: false,
+                },
+              ].map(({ step, title, desc, href }) => (
+                <Link
+                  key={step}
+                  href={href}
+                  className="flex items-start gap-3 rounded-xl border border-[hsl(var(--border))] p-4 hover:bg-[hsl(var(--accent))] hover:border-[hsl(var(--primary)/0.3)] transition-all group"
+                >
+                  <div className="w-7 h-7 rounded-full bg-[hsl(var(--cta))] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    {step}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--cta))] transition-colors">{title}</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5 leading-snug">{desc}</p>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--cta))] group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Welcome band ── */}
-      <div className="rounded-2xl border border-[hsl(var(--border))] bg-white overflow-hidden">
+      <div className="rounded-2xl bg-[hsl(var(--surface))] overflow-hidden border border-[hsl(var(--border))] shadow-sm">
+        {/* Terracotta accent strip */}
+        <div className="h-1 w-full bg-gradient-to-r from-[hsl(var(--terracotta))] via-[hsl(var(--primary))] to-[hsl(var(--terracotta)/0.4)]" />
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--warm-cream))] border border-[hsl(var(--border))] flex items-center justify-center shrink-0">
             <img src="/lutra-logo.svg" alt="Lutra" className="w-9 h-9 rounded-xl" />
           </div>
           <div className="flex-1 min-w-0">
@@ -143,21 +199,21 @@ export default function DashboardPage() {
               <Calendar className="w-3.5 h-3.5" />
               <span className="capitalize">{today}</span>
             </p>
-            <h1 className="text-2xl font-bold">
-              {greeting}, {firstName} 👋
+            <h1 className="text-2xl font-bold text-[hsl(var(--text-strong))]">
+              {greeting}, {firstName}
             </h1>
             <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">
               ¿Con qué empezamos hoy?
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button asChild size="sm" className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]">
+            <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]">
               <Link href="/patients">
                 <Plus className="w-4 h-4 mr-1" />
                 Nuevo paciente
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="border-[hsl(var(--primary)/0.4)] text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))]">
               <Link href="/ai">
                 <Sparkles className="w-4 h-4 mr-1" />
                 Plan con IA
@@ -169,9 +225,9 @@ export default function DashboardPage() {
 
       {/* ── Stats ── */}
       <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Pacientes" icon={Users}        value={isLoading ? null : (patients?.length ?? 0)} color="text-blue-600"                   bg="bg-blue-50" />
-        <StatCard label="Planes"    icon={ClipboardList} value={isLoading ? null : (plans?.length ?? 0)}    color="text-indigo-600"                  bg="bg-indigo-50" />
-        <StatCard label="Recetas"   icon={ChefHat}       value={isLoading ? null : (recipes?.length ?? 0)}  color="text-purple-600"                  bg="bg-purple-50" />
+        <StatCard label="Pacientes" icon={Users}        value={isLoading ? null : (patients?.length ?? 0)} color="text-[hsl(var(--primary))]"   bg="bg-[hsl(var(--accent))]" />
+        <StatCard label="Planes"    icon={ClipboardList} value={isLoading ? null : (plans?.length ?? 0)}    color="text-[hsl(var(--terracotta))]" bg="bg-[hsl(var(--warm-cream))]" />
+        <StatCard label="Recetas"   icon={ChefHat}       value={isLoading ? null : (recipes?.length ?? 0)}  color="text-[hsl(var(--slate-ui))]"   bg="bg-[hsl(var(--muted))]" />
       </div>
 
       {/* ── Main grid ── */}
@@ -187,16 +243,16 @@ export default function DashboardPage() {
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(var(--border))] bg-white hover:bg-[hsl(var(--muted))] hover:border-[hsl(81,10%,78%)] transition-all group"
+                className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:bg-[hsl(var(--warm-cream))] hover:border-[hsl(var(--border))] hover:shadow-sm transition-all group"
               >
-                <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-5 h-5 ${color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-tight">{label}</p>
+                  <p className="text-sm font-semibold leading-tight text-[hsl(var(--foreground))]">{label}</p>
                   <p className="text-xs text-[hsl(var(--muted-foreground))] leading-snug mt-0.5 truncate">{description}</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--primary))] transition-colors shrink-0" />
+                <ArrowRight className="w-3.5 h-3.5 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--primary))] group-hover:translate-x-0.5 transition-all shrink-0" />
               </Link>
             ))}
           </div>
@@ -206,7 +262,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 flex flex-col gap-6">
 
           {/* Recent patients */}
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Activity className="w-4 h-4 text-blue-500" />
@@ -251,7 +307,7 @@ export default function DashboardPage() {
                         href={`/patients/${p._id}`}
                         className={`flex items-center gap-3 py-2.5 px-1 hover:bg-[hsl(var(--muted))] rounded-lg transition-colors ${i < recentPatients.length - 1 ? "border-b border-[hsl(var(--border))]" : ""}`}
                       >
-                        <div className="w-8 h-8 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
                           <span className="text-[hsl(var(--primary))] text-xs font-semibold">{initials}</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -269,7 +325,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent plans */}
-          <Card className="bg-white border-[hsl(var(--border))]">
+          <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Clock className="w-4 h-4 text-indigo-500" />
@@ -294,8 +350,12 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center py-6 gap-2 text-center">
                   <ClipboardList className="w-8 h-8 text-[hsl(var(--muted-foreground))] opacity-40" />
                   <p className="text-sm text-[hsl(var(--muted-foreground))]">Sin planes aún</p>
-                  <Button asChild size="sm" variant="outline" className="mt-1">
-                    <Link href="/plans">Crear plan</Link>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))] opacity-70">Usa la IA para generar el primero en segundos</p>
+                  <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] mt-1">
+                    <Link href="/ai">
+                      <Sparkles className="w-3.5 h-3.5 mr-1" />
+                      Generar con IA
+                    </Link>
                   </Button>
                 </div>
               ) : (
@@ -306,8 +366,8 @@ export default function DashboardPage() {
                       href={`/plans/${plan._id}`}
                       className={`flex items-center gap-3 py-2.5 px-1 hover:bg-[hsl(var(--muted))] rounded-lg transition-colors ${i < recentPlans.length - 1 ? "border-b border-[hsl(var(--border))]" : ""}`}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                        <ClipboardList className="w-4 h-4 text-indigo-600" />
+                      <div className="w-8 h-8 rounded-lg bg-[hsl(var(--muted))] flex items-center justify-center shrink-0">
+                        <ClipboardList className="w-4 h-4 text-[hsl(var(--slate-ui))]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{plan.title}</p>
@@ -344,7 +404,7 @@ function StatCard({
   bg: string;
 }) {
   return (
-    <Card className="bg-white border-[hsl(var(--border))]">
+    <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
       <CardContent className="p-4 flex items-center gap-4">
         <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
           <Icon className={`w-5 h-5 ${color}`} />

@@ -24,6 +24,11 @@ import {
   Leaf,
   X,
   RefreshCw,
+  Sun,
+  Moon,
+  Coffee,
+  Utensils,
+  Apple,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +56,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { HistoriaClinicaTab } from "@/features/patients/historia-clinica-tab";
 import { SeguimientoTab } from "@/features/patients/seguimiento-tab";
+import { TamizajesTab } from "@/features/patients/tamizajes-tab";
+import { PatologiasTab } from "@/features/patients/patologias-tab";
 
 const COMMON_ALLERGIES = [
   "Lactosa", "Gluten", "Mariscos", "Frutos secos", "Cacahuate",
@@ -90,9 +97,9 @@ const ACTIVITY_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-700",
-  draft: "bg-yellow-100 text-yellow-700",
-  archived: "bg-gray-100 text-gray-600",
+  active:   "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] border border-[hsl(var(--border))]",
+  draft:    "bg-[hsl(var(--warm-cream))] text-[hsl(var(--terracotta))] border border-[hsl(var(--border))]",
+  archived: "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))]",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -115,6 +122,9 @@ export default function PatientDetailPage({
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
   const [editAllergies, setEditAllergies] = useState<string[]>([]);
+  const [editRecallFields, setEditRecallFields] = useState({
+    desayuno: "", colAm: "", comida: "", colPm: "", cena: "",
+  });
   const [editAllergyInput, setEditAllergyInput] = useState("");
 
   // Measurements state
@@ -162,7 +172,40 @@ export default function PatientDetailPage({
     );
   }
 
+  function parseRecallFields(raw: string) {
+    const f = { desayuno: "", colAm: "", comida: "", colPm: "", cena: "" };
+    if (!raw.trim()) return f;
+    if (/desayuno:/i.test(raw)) {
+      f.desayuno = (raw.match(/desayuno:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      f.colAm    = (raw.match(/colaci[oó]n am:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      f.comida   = (raw.match(/comida:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      f.colPm    = (raw.match(/colaci[oó]n pm:\s*([^\n]*)/i)?.[1] ?? "").trim();
+      f.cena     = (raw.match(/cena:\s*([^\n]*)/i)?.[1] ?? "").trim();
+    } else {
+      f.desayuno = raw.trim();
+    }
+    return f;
+  }
+
+  function composeRecall(f: typeof editRecallFields): string {
+    return [
+      f.desayuno && `Desayuno: ${f.desayuno}`,
+      f.colAm    && `Colación AM: ${f.colAm}`,
+      f.comida   && `Comida: ${f.comida}`,
+      f.colPm    && `Colación PM: ${f.colPm}`,
+      f.cena     && `Cena: ${f.cena}`,
+    ].filter(Boolean).join("\n");
+  }
+
+  function updateEditRecallField(key: keyof typeof editRecallFields, value: string) {
+    const next = { ...editRecallFields, [key]: value };
+    setEditRecallFields(next);
+    setEditForm((prev: any) => ({ ...prev, recall24h: composeRecall(next) }));
+  }
+
   function openEdit() {
+    const raw = patient.recall24h ?? "";
+    setEditRecallFields(parseRecallFields(raw));
     setEditForm({
       name: patient.name,
       email: patient.email ?? "",
@@ -176,7 +219,7 @@ export default function PatientDetailPage({
       notes: patient.notes ?? "",
       foodPreferences: patient.foodPreferences ?? "",
       adherenceRating: patient.adherenceRating ?? "",
-      recall24h: patient.recall24h ?? "",
+      recall24h: raw,
     });
     setEditAllergies(patient.allergies ?? []);
     setEditAllergyInput("");
@@ -320,7 +363,7 @@ export default function PatientDetailPage({
 
       {/* Patient header */}
       <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+        <div className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--border))] flex items-center justify-center shrink-0">
           <span className="text-[hsl(var(--primary))] text-lg font-bold">{initials}</span>
         </div>
         <div>
@@ -336,7 +379,7 @@ export default function PatientDetailPage({
             <Pencil className="w-4 h-4 mr-1" />
             Editar
           </Button>
-          <Button asChild size="sm" className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]">
+          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]">
             <Link href={`/plans?patientId=${patient._id}`}>
               <Plus className="w-4 h-4 mr-1" />
               Nuevo Plan
@@ -374,6 +417,14 @@ export default function PatientDetailPage({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="tamizajes" className="flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5" />
+            Tamizajes
+          </TabsTrigger>
+          <TabsTrigger value="patologias" className="flex items-center gap-1.5">
+            <Stethoscope className="w-3.5 h-3.5" />
+            Patologías
+          </TabsTrigger>
         </TabsList>
 
         {/* Seguimiento Tab */}
@@ -390,7 +441,7 @@ export default function PatientDetailPage({
         <TabsContent value="profile">
           <div className="grid md:grid-cols-2 gap-4">
             {/* Anthropometrics */}
-            <Card className="bg-white border-[hsl(var(--border))]">
+            <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                   Datos Antropométricos
@@ -430,7 +481,7 @@ export default function PatientDetailPage({
             </Card>
 
             {/* Activity & Goal */}
-            <Card className="bg-white border-[hsl(var(--border))]">
+            <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                   Actividad y Objetivo
@@ -471,7 +522,7 @@ export default function PatientDetailPage({
           {(patient.allergies?.length > 0 || patient.foodPreferences || patient.recall24h) && (
             <div className="grid md:grid-cols-2 gap-4 mt-4">
               {(patient.allergies?.length > 0 || patient.foodPreferences) && (
-                <Card className="bg-white border-[hsl(var(--border))]">
+                <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
                       Alergias y Preferencias
@@ -506,19 +557,53 @@ export default function PatientDetailPage({
                   </CardContent>
                 </Card>
               )}
-              {patient.recall24h && (
-                <Card className="bg-white border-[hsl(var(--border))]">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
-                      Recordatorio 24hr
-                    </CardTitle>
-                  </CardHeader>
-                  <Separator />
-                  <CardContent className="pt-4">
-                    <p className="text-sm whitespace-pre-wrap text-[hsl(var(--foreground))]">{patient.recall24h}</p>
-                  </CardContent>
-                </Card>
-              )}
+              {patient.recall24h && (() => {
+                const MEAL_CONFIG = [
+                  { key: "desayuno", icon: Sun,      label: "Desayuno",    accent: "#d97706", bg: "#fef9c3" },
+                  { key: "colAm",    icon: Coffee,   label: "Colación AM", accent: "#16a34a", bg: "#dcfce7" },
+                  { key: "comida",   icon: Utensils, label: "Comida",      accent: "#2563eb", bg: "#dbeafe" },
+                  { key: "colPm",    icon: Apple,    label: "Colación PM", accent: "#ea580c", bg: "#ffedd5" },
+                  { key: "cena",     icon: Moon,     label: "Cena",        accent: "#7c3aed", bg: "#ede9fe" },
+                ];
+                const raw = patient.recall24h;
+                const parsed: Record<string, string> = {};
+                if (/desayuno:/i.test(raw)) {
+                  parsed.desayuno = (raw.match(/desayuno:\s*([^\n]*)/i)?.[1] ?? "").trim();
+                  parsed.colAm    = (raw.match(/colaci[oó]n am:\s*([^\n]*)/i)?.[1] ?? "").trim();
+                  parsed.comida   = (raw.match(/comida:\s*([^\n]*)/i)?.[1] ?? "").trim();
+                  parsed.colPm    = (raw.match(/colaci[oó]n pm:\s*([^\n]*)/i)?.[1] ?? "").trim();
+                  parsed.cena     = (raw.match(/cena:\s*([^\n]*)/i)?.[1] ?? "").trim();
+                } else {
+                  parsed.desayuno = raw.trim();
+                }
+                const hasMeals = MEAL_CONFIG.some(m => parsed[m.key]);
+                return (
+                  <Card className="bg-[hsl(var(--surface))] border-[hsl(var(--border))]">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+                        Recordatorio 24hr
+                      </CardTitle>
+                    </CardHeader>
+                    <Separator />
+                    <CardContent className="pt-3 pb-3 flex flex-col gap-1.5">
+                      {hasMeals
+                        ? MEAL_CONFIG.filter(m => parsed[m.key]).map(({ key, icon: Icon, label, accent, bg }) => (
+                          <div key={key} className="flex gap-2.5 items-start py-1">
+                            <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: bg }}>
+                              <Icon className="w-3 h-3" style={{ color: accent }} />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">{label}</p>
+                              <p className="text-sm text-[hsl(var(--foreground))] leading-snug">{parsed[key]}</p>
+                            </div>
+                          </div>
+                        ))
+                        : <p className="text-sm text-[hsl(var(--foreground))] whitespace-pre-wrap">{raw}</p>
+                      }
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
           )}
         </TabsContent>
@@ -530,7 +615,7 @@ export default function PatientDetailPage({
               size="sm"
               variant="outline"
               onClick={() => setAiPlanOpen(true)}
-              className="border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(81,10%,95%)]"
+              className="border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))]"
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
               Generar plan con IA
@@ -538,7 +623,7 @@ export default function PatientDetailPage({
             <Button
               asChild
               size="sm"
-              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
             >
               <Link href={`/plans?patientId=${patient._id}`}>
                 <Plus className="w-3.5 h-3.5 mr-1" />
@@ -553,7 +638,7 @@ export default function PatientDetailPage({
               ))}
             </div>
           ) : plans.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-xl border border-[hsl(var(--border))]">
+            <div className="flex flex-col items-center justify-center py-16 gap-3 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))]">
               <div className="w-12 h-12 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center">
                 <ClipboardList className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
               </div>
@@ -564,7 +649,7 @@ export default function PatientDetailPage({
               <Button
                 asChild
                 size="sm"
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] mt-1"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] mt-1"
               >
                 <Link href={`/plans?patientId=${patient._id}`}>
                   <Plus className="w-4 h-4 mr-1" />
@@ -578,9 +663,9 @@ export default function PatientDetailPage({
                 <Link
                   key={plan._id}
                   href={`/plans/${plan._id}`}
-                  className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors"
+                  className="flex items-center gap-4 p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[hsl(81,10%,92%)] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-[hsl(var(--accent))] flex items-center justify-center shrink-0">
                     <ClipboardList className="w-5 h-5 text-[hsl(var(--primary))]" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -604,12 +689,22 @@ export default function PatientDetailPage({
           )}
         </TabsContent>
 
+        {/* Tamizajes Tab */}
+        <TabsContent value="tamizajes">
+          <TamizajesTab patientId={patientId} />
+        </TabsContent>
+
+        {/* Patologías Tab */}
+        <TabsContent value="patologias">
+          <PatologiasTab patientId={patientId} />
+        </TabsContent>
+
         {/* Legacy: hidden, replaced by SeguimientoTab */}
         <TabsContent value="history">
           <div className="flex flex-col gap-4">
 
             {/* Add measurement form */}
-            <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5">
+            <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5">
               <p className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <Scale className="w-4 h-4 text-[hsl(var(--primary))]" />
                 Registrar medición
@@ -652,7 +747,7 @@ export default function PatientDetailPage({
                 size="sm"
                 onClick={handleAddMeasurement}
                 disabled={mSubmitting || !mForm.date}
-                className="mt-4 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {mSubmitting && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
@@ -662,7 +757,7 @@ export default function PatientDetailPage({
 
             {/* Weight chart */}
             {measurements && measurements.length >= 2 && (
-              <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5">
+              <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5">
                 <p className="text-sm font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-[hsl(var(--primary))]" />
                   Evolución del peso
@@ -672,7 +767,7 @@ export default function PatientDetailPage({
             )}
 
             {/* Measurements table */}
-            <div className="bg-white rounded-xl border border-[hsl(var(--border))] overflow-hidden">
+            <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] overflow-hidden">
               <div className="px-5 py-3 border-b border-[hsl(var(--border))] text-xs font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] grid grid-cols-[100px_70px_60px_70px_65px_65px_1fr_32px] gap-2">
                 <span>Fecha</span><span>Peso</span><span>%Grasa</span><span>Músculo</span><span>Cintura</span><span>Cadera</span><span>Notas</span><span />
               </div>
@@ -713,7 +808,7 @@ export default function PatientDetailPage({
         <TabsContent value="consultations_legacy">
           <div className="flex flex-col gap-4">
             {/* Add consultation form */}
-            <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-5">
+            <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5">
               <p className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-[hsl(var(--primary))]" />
                 Registrar consulta
@@ -754,7 +849,7 @@ export default function PatientDetailPage({
                 size="sm"
                 onClick={handleAddConsultation}
                 disabled={cSubmitting || !cForm.date}
-                className="mt-4 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {cSubmitting && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
@@ -767,12 +862,12 @@ export default function PatientDetailPage({
               {consultations === undefined ? (
                 [...Array(2)].map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)
               ) : consultations.length === 0 ? (
-                <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-10 text-center text-sm text-[hsl(var(--muted-foreground))]">
+                <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-10 text-center text-sm text-[hsl(var(--muted-foreground))]">
                   Aún no hay consultas registradas. ¡Agrega la primera arriba!
                 </div>
               ) : (
                 consultations.map((c: any) => (
-                  <div key={c._id} className="group bg-white rounded-xl border border-[hsl(var(--border))] p-4 flex flex-col gap-2">
+                  <div key={c._id} className="group bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold">{c.date}</span>
@@ -988,16 +1083,41 @@ export default function PatientDetailPage({
                 </Select>
               </div>
 
-              {/* 24hr recall */}
-              <div className="space-y-1.5">
-                <Label>Recordatorio alimentario 24hr</Label>
-                <Textarea
-                  rows={3}
-                  value={editForm.recall24h}
-                  onChange={(e) => setEditForm({ ...editForm, recall24h: e.target.value })}
-                  placeholder={"Desayuno: 2 huevos, tortillas...\nComida: arroz, frijoles, pollo...\nCena: sopa, pan..."}
-                  className="text-sm"
-                />
+              {/* 24hr recall — estructurado por tiempo de comida */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Recordatorio alimentario 24hr</Label>
+                {([
+                  { key: "desayuno" as const, icon: Sun,      label: "Desayuno",     placeholder: "Ej: 2 huevos, 2 tortillas, café",             accent: "#d97706", bg: "#fef9c3" },
+                  { key: "colAm"    as const, icon: Coffee,   label: "Colación AM",  placeholder: "Ej: 1 fruta, yogurt",                         accent: "#16a34a", bg: "#dcfce7" },
+                  { key: "comida"   as const, icon: Utensils, label: "Comida",       placeholder: "Ej: arroz, frijoles, pollo, agua de sabor",   accent: "#2563eb", bg: "#dbeafe" },
+                  { key: "colPm"    as const, icon: Apple,    label: "Colación PM",  placeholder: "Ej: galletas, fruta",                         accent: "#ea580c", bg: "#ffedd5" },
+                  { key: "cena"     as const, icon: Moon,     label: "Cena",         placeholder: "Ej: sopa, pan, leche",                        accent: "#7c3aed", bg: "#ede9fe" },
+                ] as const).map(({ key, icon: Icon, label, placeholder, accent, bg }) => (
+                  <div
+                    key={key}
+                    className="flex gap-2 items-start rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 focus-within:border-[hsl(var(--primary))] transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: bg }}>
+                      <Icon className="w-3 h-3" style={{ color: accent }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-0.5">{label}</p>
+                      <textarea
+                        rows={1}
+                        value={editRecallFields[key]}
+                        onChange={(e) => updateEditRecallField(key, e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full resize-none bg-transparent text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))]/50 outline-none leading-snug"
+                        style={{ minHeight: "1.3rem" }}
+                        onInput={(e) => {
+                          const el = e.currentTarget;
+                          el.style.height = "auto";
+                          el.style.height = el.scrollHeight + "px";
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             <DialogFooter className="pt-2">
@@ -1005,7 +1125,7 @@ export default function PatientDetailPage({
               <Button
                 onClick={handleEdit}
                 disabled={!editForm.name?.trim() || editSubmitting}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {editSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Guardar cambios
@@ -1262,7 +1382,7 @@ function AIPlanDialog({ patient, open, onClose }: { patient: any; open: boolean;
               <Button variant="outline" onClick={onClose}>Cancelar</Button>
               <Button
                 onClick={handleGenerate}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)] gap-1.5"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Generar con IA
@@ -1274,7 +1394,7 @@ function AIPlanDialog({ patient, open, onClose }: { patient: any; open: boolean;
         {/* ── Step 2: Generating ── */}
         {step === "generating" && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="w-14 h-14 rounded-full bg-[hsl(81,10%,92%)] flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
               <Sparkles className="w-7 h-7 text-[hsl(var(--primary))] animate-pulse" />
             </div>
             <p className="text-sm font-medium">Generando plan con IA...</p>
@@ -1360,7 +1480,7 @@ function AIPlanDialog({ patient, open, onClose }: { patient: any; open: boolean;
               <Button
                 onClick={handleSave}
                 disabled={saving || !planTitle.trim()}
-                className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(81,10%,44%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
               >
                 {saving && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 Guardar plan

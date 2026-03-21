@@ -86,7 +86,7 @@ export function MobileSidebar() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))]"
+                    ? "bg-[hsl(var(--warm-cream))] text-[hsl(var(--primary))]"
                     : "text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--primary))]"
                 )}
               >

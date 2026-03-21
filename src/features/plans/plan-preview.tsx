@@ -125,7 +125,7 @@ export function PlanPreview({ plan, patient, nutritionist, meals, onPrint }: Pla
       {/* Printable content */}
       <div
         ref={printRef}
-        className="bg-white border rounded-xl overflow-hidden shadow-sm print:shadow-none print:border-none"
+        className="bg-[hsl(var(--surface))] border rounded-xl overflow-hidden shadow-sm print:shadow-none print:border-none"
         style={{ maxWidth: 800, margin: "0 auto" }}
       >
         {/* Header */}

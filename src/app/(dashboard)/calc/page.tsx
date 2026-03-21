@@ -196,7 +196,7 @@ function computeTotals(equivs: Equivs) {
 
 function SectionCard({ icon: Icon, title, accent = false, children }: { icon: any; title: string; accent?: boolean; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-[hsl(var(--border))] overflow-hidden">
+    <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] overflow-hidden">
       <div
         className="flex items-center gap-2.5 px-5 py-3.5 border-b border-[hsl(var(--border))]"
         style={accent ? { background: `linear-gradient(135deg, ${ACCENT}15, ${ACCENT}08)` } : {}}
@@ -801,7 +801,7 @@ export default function CalcPage() {
                     onClick={() => setMacroMode(m)}
                     className={cn(
                       "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-                      macroMode === m ? "bg-white shadow-sm text-[hsl(var(--foreground))]" : "text-[hsl(var(--muted-foreground))]"
+                      macroMode === m ? "bg-[hsl(var(--surface))] shadow-sm text-[hsl(var(--foreground))]" : "text-[hsl(var(--muted-foreground))]"
                     )}
                   >
                     {m === "pct" ? "Por porcentaje" : "Por g/kg peso"}
@@ -888,7 +888,7 @@ export default function CalcPage() {
               : bmi < 40 ? { label: "Obesidad II", color: "#dc2626" }
               : { label: "Obesidad III", color: "#991b1b" };
             return (
-              <div className="bg-white rounded-xl border border-[hsl(var(--border))] p-4 flex items-center gap-5">
+              <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-4 flex items-center gap-5">
                 <div className="text-center">
                   <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-1">IMC</p>
                   <p className="text-2xl font-bold" style={{ color: "#6366f1" }}>{bmi}</p>
@@ -964,7 +964,7 @@ export default function CalcPage() {
           {/* Food list */}
           {recallFoods.length > 0 && (
             <div className="rounded-lg border border-[hsl(var(--border))] overflow-hidden">
-              <div className="grid grid-cols-[1fr_160px_140px_32px] gap-2 px-3 py-2 text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide bg-[hsl(var(--muted))]">
+              <div className="grid grid-cols-[1fr_160px_140px_32px] gap-2 px-3 py-2 text-[11px] font-bold text-[hsl(var(--foreground))] uppercase tracking-wider bg-[hsl(var(--table-header))] border-b border-[hsl(var(--border))]">
                 <span>Alimento</span>
                 <span>Cantidad</span>
                 <span>Grupo SMAE</span>
@@ -1038,12 +1038,12 @@ export default function CalcPage() {
           {/* Group equivalents table */}
           <div className="bg-[hsl(var(--muted))/40] rounded-lg overflow-hidden border border-[hsl(var(--border))]">
             {/* Header */}
-            <div className="grid grid-cols-[160px_100px_60px_50px_50px_50px] gap-2 px-3 py-2 text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide bg-[hsl(var(--muted))]">
+            <div className="grid grid-cols-[160px_100px_60px_50px_50px_50px] gap-2 px-3 py-2 text-[11px] font-bold text-[hsl(var(--foreground))] uppercase tracking-wider bg-[hsl(var(--table-header))] border-b border-[hsl(var(--border))]">
               <span>Grupo</span>
               <span className="text-center">Equiv. −/+</span>
               <span className="text-center">kcal</span>
-              <span className="text-center text-blue-600">P</span>
-              <span className="text-center text-yellow-600">L</span>
+              <span className="text-center">P</span>
+              <span className="text-center">L</span>
               <span className="text-center" style={{ color: ACCENT }}>HC</span>
             </div>
             <div className="px-3 py-1">

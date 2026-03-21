@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import {
@@ -12,162 +12,148 @@ import {
   User,
   AlertTriangle,
   RefreshCw,
-  Leaf,
+  CheckCircle2,
+  Info,
   Sun,
   Moon,
   Coffee,
   Utensils,
   Apple,
+  Leaf,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  SMAE_DATA,
+  SMAE_KEYS,
+  GOAL_LABELS,
+  ACTIVITY_LABELS,
+  GOAL_ADJUSTMENTS,
+  ACTIVITY_FACTORS,
+  calculateProtocol,
+  distributeSMAE,
+  computeEquivalentTotals,
+  validatePlan,
+  type ClinicalProtocol,
+  type SmaeKey,
+  type ValidationReport,
+} from "@/lib/clinical-engine";
 
 export const dynamic = "force-dynamic";
 
-// ─── SMAE reference data ──────────────────────────────────────────────────────
+// ─── Local constants (only used in this page) ─────────────────────────────────
 
-const SMAE_META = {
-  verduras:         { label: "Verduras",              kcal: 25,  p: 2, l: 0, hc: 4  },
-  frutas:           { label: "Frutas",                kcal: 60,  p: 0, l: 0, hc: 15 },
-  cerealesSinGrasa: { label: "Cereales sin grasa",    kcal: 70,  p: 2, l: 0, hc: 15 },
-  cerealesConGrasa: { label: "Cereales con grasa",    kcal: 115, p: 2, l: 4, hc: 15 },
-  leguminosas:      { label: "Leguminosas",           kcal: 120, p: 8, l: 1, hc: 20 },
-  aoaMuyBajaGrasa:  { label: "AOA muy baja grasa",    kcal: 40,  p: 7, l: 1, hc: 0  },
-  aoaBajaGrasa:     { label: "AOA baja grasa",        kcal: 55,  p: 7, l: 3, hc: 0  },
-  aoaMedGrasa:      { label: "AOA mediana grasa",     kcal: 75,  p: 7, l: 5, hc: 0  },
-  aoaAltaGrasa:     { label: "AOA alta grasa",        kcal: 100, p: 7, l: 8, hc: 0  },
-  lecheDes:         { label: "Leche descremada",      kcal: 95,  p: 9, l: 2, hc: 12 },
-  lecheSemi:        { label: "Leche semidescremada",  kcal: 110, p: 9, l: 4, hc: 12 },
-  lecheEntera:      { label: "Leche entera",          kcal: 150, p: 9, l: 8, hc: 12 },
-  lecheConAzucar:   { label: "Leche con azúcar",      kcal: 200, p: 8, l: 5, hc: 30 },
-  grasasSinProt:    { label: "Grasas sin proteína",   kcal: 45,  p: 0, l: 5, hc: 0  },
-  grasasConProt:    { label: "Grasas con proteína",   kcal: 70,  p: 3, l: 5, hc: 3  },
-  azucaresSinGrasa: { label: "Azúcares sin grasa",    kcal: 40,  p: 0, l: 0, hc: 10 },
-  azucaresConGrasa: { label: "Azúcares con grasa",    kcal: 85,  p: 0, l: 4, hc: 10 },
-} as const;
-
-type SmaeKey = keyof typeof SMAE_META;
-const SMAE_KEYS = Object.keys(SMAE_META) as SmaeKey[];
-
-const ACTIVITY_FACTORS: Record<string, number> = {
-  sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9,
-};
-const GOAL_DELTA: Record<string, number> = {
-  weight_loss: -500, maintenance: 0, weight_gain: 500, muscle_gain: 300, health: 0,
-};
-const GOAL_LABELS: Record<string, string> = {
-  weight_loss: "Pérdida de peso", maintenance: "Mantenimiento",
-  weight_gain: "Ganancia de peso", muscle_gain: "Masa muscular", health: "Salud general",
-};
-const ACTIVITY_LABELS: Record<string, string> = {
-  sedentary: "Sedentario", light: "Ligero", moderate: "Moderado",
-  active: "Activo", very_active: "Muy activo",
-};
 const ADHERENCE_COLORS: Record<string, string> = {
-  alta: "bg-green-100 text-green-700 border-green-200",
+  alta:  "bg-green-100 text-green-700 border-green-200",
   media: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  baja: "bg-red-100 text-red-700 border-red-200",
+  baja:  "bg-red-100 text-red-700 border-red-200",
 };
 const ADHERENCE_LABELS: Record<string, string> = {
-  alta: "Adherencia alta",
+  alta:  "Adherencia alta",
   media: "Adherencia media",
-  baja: "Adherencia baja",
+  baja:  "Adherencia baja",
 };
 
-function mifflinBMR(w: number, h: number, a: number, sex: string) {
-  return sex === "male" ? 10 * w + 6.25 * h - 5 * a + 5 : 10 * w + 6.25 * h - 5 * a - 161;
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v));
 }
-
-function computeEquivTotals(equivs: Record<string, number>) {
-  let kcal = 0, p = 0, l = 0, hc = 0;
-  for (const key of SMAE_KEYS) {
-    const n = equivs[key] ?? 0;
-    const g = SMAE_META[key];
-    kcal += n * g.kcal; p += n * g.p; l += n * g.l; hc += n * g.hc;
-  }
-  return {
-    kcal: Math.round(kcal),
-    p: Math.round(p * 10) / 10,
-    l: Math.round(l * 10) / 10,
-    hc: Math.round(hc * 10) / 10,
-  };
-}
-
-// Clamp a value between min and max
-function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)); }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AIPlanPage() {
   const { toast } = useToast();
-  const [search, setSearch] = useState("");
+  const [search, setSearch]                 = useState("");
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [step, setStep] = useState<"select" | "setup" | "recall" | "generating" | "review">("select");
 
-  // ── Setup state ──
-  const [targetKcal, setTargetKcal] = useState(2000);
-  const [proteinPct, setProteinPct] = useState(20);
-  const [fatPct, setFatPct] = useState(30);
-  // carbsPct is derived: 100 - protein - fat
+  // ── Protocol & setup state ──
+  const [protocol, setProtocol]         = useState<ClinicalProtocol | null>(null);
+  const [targetKcal, setTargetKcal]     = useState(2000);
+  // Advanced macro override (off by default — deterministic values are used)
+  const [macroOverride, setMacroOverride] = useState(false);
+  const [proteinPct, setProteinPct]     = useState(20);
+  const [fatPct, setFatPct]             = useState(30);
 
   // ── Recall state ──
   const [adaptFromRecall, setAdaptFromRecall] = useState(true);
-  const [recall24h, setRecall24h] = useState("");
-  const [recallFields, setRecallFields] = useState({
+  const [recall24h, setRecall24h]             = useState("");
+  const [recallFields, setRecallFields]       = useState({
     desayuno: "", colAm: "", comida: "", colPm: "", cena: "",
   });
 
   // ── Review state ──
-  const [equivalents, setEquivalents] = useState<Record<string, number>>({});
-  const [reasoning, setReasoning] = useState("");
-  const [planTitle, setPlanTitle] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [regenerating, setRegenerating] = useState(false);
-  const [savingRecall, setSavingRecall] = useState(false);
-  // Track whether recall was edited from patient's stored value
+  const [equivalents, setEquivalents]     = useState<Record<string, number>>({});
+  const [reasoning, setReasoning]         = useState("");
+  const [validation, setValidation]       = useState<ValidationReport | null>(null);
+  const [planTitle, setPlanTitle]         = useState("");
+  const [saving, setSaving]               = useState(false);
+  const [regenerating, setRegenerating]   = useState(false);
+  const [savingRecall, setSavingRecall]   = useState(false);
   const [recallWasEdited, setRecallWasEdited] = useState(false);
 
-  const patients = useQuery(
-    api.patients.searchPatients,
-    search.trim().length > 0 ? { query: search } : { query: "" }
-  );
+  const patients             = useQuery(api.patients.searchPatients, { query: search });
   const generateNutritionPlan = useAction(api.ai.generateNutritionPlan);
-  const createPlan = useMutation(api.plans.createPlan);
-  const updatePatient = useMutation(api.patients.updatePatient);
+  const createPlan           = useMutation(api.plans.createPlan);
+  const updatePatient        = useMutation(api.patients.updatePatient);
 
+  // ── Derived macro values ───────────────────────────────────────────────────
+  // If macroOverride is off: use protocol values (deterministic)
+  // If macroOverride is on:  use the slider percentages
   const carbsPct = Math.max(5, 100 - proteinPct - fatPct);
-  const bmr = selectedPatient
-    ? mifflinBMR(selectedPatient.weightKg, selectedPatient.heightCm, selectedPatient.age ?? 30, selectedPatient.sex)
-    : 0;
-  const tdeeBase = selectedPatient
-    ? Math.round(bmr * (ACTIVITY_FACTORS[selectedPatient.activityLevel] ?? 1.55))
-    : 0;
-  const goalDelta = selectedPatient ? (GOAL_DELTA[selectedPatient.goal] ?? 0) : 0;
 
-  const proteinG = Math.round((targetKcal * proteinPct) / 100 / 4);
-  const fatG = Math.round((targetKcal * fatPct) / 100 / 9);
-  const carbsG = Math.round((targetKcal * carbsPct) / 100 / 4);
-  const proteinGkg = selectedPatient ? (proteinG / selectedPatient.weightKg).toFixed(1) : "—";
-  const fatGkg = selectedPatient ? (fatG / selectedPatient.weightKg).toFixed(1) : "—";
-  const carbsGkg = selectedPatient ? (carbsG / selectedPatient.weightKg).toFixed(1) : "—";
+  const activeProteinG = macroOverride
+    ? Math.round((targetKcal * proteinPct) / 100 / 4)
+    : protocol?.targetProteinG ?? Math.round((targetKcal * 0.20) / 4);
 
-  const macroSum = proteinPct + fatPct + carbsPct;
+  const activeFatG = macroOverride
+    ? Math.round((targetKcal * fatPct) / 100 / 9)
+    : protocol?.targetFatG ?? Math.round((targetKcal * 0.30) / 9);
+
+  const activeCarbsG = Math.round((targetKcal - activeProteinG * 4 - activeFatG * 9) / 4);
+
+  // Display percentages (always show actual %)
+  const displayProteinPct = macroOverride
+    ? proteinPct
+    : protocol?.proteinPct ?? Math.round((activeProteinG * 4 / targetKcal) * 100);
+  const displayFatPct = macroOverride
+    ? fatPct
+    : protocol?.fatPct ?? 30;
+  const displayCarbsPct = macroOverride
+    ? carbsPct
+    : protocol?.carbsPct ?? Math.round((activeCarbsG * 4 / targetKcal) * 100);
+
+  const proteinGkg = selectedPatient
+    ? (activeProteinG / selectedPatient.weightKg).toFixed(1)
+    : "—";
+
+  // ── Patient selection ──────────────────────────────────────────────────────
 
   function handleSelectPatient(patient: any) {
     setSelectedPatient(patient);
-    const age = patient.age ?? 30;
-    const bmr = mifflinBMR(patient.weightKg, patient.heightCm, age, patient.sex);
-    const actFactor = ACTIVITY_FACTORS[patient.activityLevel] ?? 1.55;
-    const tdee = Math.round(bmr * actFactor);
-    const delta = GOAL_DELTA[patient.goal] ?? 0;
-    setTargetKcal(tdee + delta);
-    setProteinPct(20);
-    setFatPct(30);
-    // Pre-fill recall from patient profile
+
+    // Compute protocol deterministically
+    const p = calculateProtocol(
+      {
+        sex:           patient.sex,
+        ageYears:      patient.age ?? 30,
+        weightKg:      patient.weightKg,
+        heightCm:      patient.heightCm,
+        activityLevel: patient.activityLevel,
+        goal:          patient.goal,
+      },
+      "mifflin",
+    );
+    setProtocol(p);
+    setTargetKcal(p.targetCalories);
+    // Sliders start at protocol values (used only if override is enabled)
+    setProteinPct(p.proteinPct);
+    setFatPct(p.fatPct);
+    setMacroOverride(false);
+
+    // Pre-fill recall
     const raw = patient.recall24h ?? "";
     setRecall24h(raw);
     setRecallFields(parseRecallFields(raw));
@@ -176,47 +162,65 @@ export default function AIPlanPage() {
     setStep("setup");
   }
 
-  // Adjust macros while keeping sum = 100%
+  // Recompute protocol when kcal is manually changed
+  function handleKcalChange(kcal: number) {
+    setTargetKcal(kcal);
+    if (!selectedPatient) return;
+    const p = calculateProtocol(
+      {
+        sex:           selectedPatient.sex,
+        ageYears:      selectedPatient.age ?? 30,
+        weightKg:      selectedPatient.weightKg,
+        heightCm:      selectedPatient.heightCm,
+        activityLevel: selectedPatient.activityLevel,
+        goal:          selectedPatient.goal,
+      },
+      "mifflin",
+      kcal,
+    );
+    setProtocol(p);
+    if (!macroOverride) {
+      setProteinPct(p.proteinPct);
+      setFatPct(p.fatPct);
+    }
+  }
+
+  // ── Macro override sliders ──────────────────────────────────────────────────
+
   function setProtein(val: number) {
     const p = clamp(val, 10, 50);
     const f = clamp(fatPct, 10, 100 - p - 5);
-    setProteinPct(p);
-    setFatPct(f);
+    setProteinPct(p); setFatPct(f);
   }
   function setFat(val: number) {
     const f = clamp(val, 10, 50);
     const p = clamp(proteinPct, 10, 100 - f - 5);
-    setProteinPct(p);
-    setFatPct(f);
+    setProteinPct(p); setFatPct(f);
   }
   function setCarbsManual(val: number) {
     const hc = clamp(val, 5, 70);
     const remaining = 100 - hc;
-    // Distribute remaining proportionally between protein and fat
     const ratio = proteinPct / (proteinPct + fatPct) || 0.4;
     const p = clamp(Math.round(remaining * ratio), 10, 50);
     const f = clamp(remaining - p, 10, 50);
-    setProteinPct(p);
-    setFatPct(f);
+    setProteinPct(p); setFatPct(f);
   }
 
   // ── Recall helpers ──────────────────────────────────────────────────────────
 
   function composeRecall(fields: typeof recallFields): string {
-    const lines = [
+    return [
       fields.desayuno && `Desayuno: ${fields.desayuno}`,
       fields.colAm    && `Colación AM: ${fields.colAm}`,
       fields.comida   && `Comida: ${fields.comida}`,
       fields.colPm    && `Colación PM: ${fields.colPm}`,
       fields.cena     && `Cena: ${fields.cena}`,
-    ].filter(Boolean);
-    return lines.join("\n");
+    ].filter(Boolean).join("\n");
   }
 
   function parseRecallFields(raw: string): typeof recallFields {
     const fields = { desayuno: "", colAm: "", comida: "", colPm: "", cena: "" };
     if (!raw.trim()) return fields;
-    // Si tiene etiquetas estructuradas, parsearlas
     if (/desayuno:/i.test(raw)) {
       fields.desayuno = (raw.match(/desayuno:\s*([^\n]*)/i)?.[1] ?? "").trim();
       fields.colAm    = (raw.match(/colaci[oó]n am:\s*([^\n]*)/i)?.[1] ?? "").trim();
@@ -224,7 +228,6 @@ export default function AIPlanPage() {
       fields.colPm    = (raw.match(/colaci[oó]n pm:\s*([^\n]*)/i)?.[1] ?? "").trim();
       fields.cena     = (raw.match(/cena:\s*([^\n]*)/i)?.[1] ?? "").trim();
     } else {
-      // Formato libre: poner todo en desayuno como fallback
       fields.desayuno = raw.trim();
     }
     return fields;
@@ -238,30 +241,101 @@ export default function AIPlanPage() {
     setRecallWasEdited(composed.trim() !== (selectedPatient?.recall24h ?? "").trim());
   }
 
+  // ── Equivalents adjustment (with live re-validation) ───────────────────────
+
+  function adjustEquivalent(key: SmaeKey, delta: number) {
+    const newEquivs = { ...equivalents, [key]: Math.max(0, (equivalents[key] ?? 0) + delta) };
+    setEquivalents(newEquivs);
+    if (selectedPatient && protocol) {
+      setValidation(validatePlan(
+        newEquivs,
+        {
+          kcal:     protocol.targetCalories,
+          proteinG: activeProteinG,
+          fatG:     activeFatG,
+          carbsG:   activeCarbsG,
+        },
+        selectedPatient.weightKg,
+      ));
+    }
+  }
+
+  // ── Generate ────────────────────────────────────────────────────────────────
+
   async function runGenerate(fromReview = false) {
-    if (!selectedPatient) return;
+    if (!selectedPatient || !protocol) return;
     if (fromReview) setRegenerating(true);
     else setStep("generating");
+
     try {
+      // Layer 2 — Deterministic SMAE distribution (no AI)
+      const dairyFree  = selectedPatient.allergies?.some((a: string) =>
+        /l[aá]cteo|leche|lactosa|dairy/i.test(a));
+      const vegetarian = /vegetariana?|vegana?/i.test(selectedPatient.foodPreferences ?? "");
+
+      const dist = distributeSMAE(
+        { kcal: targetKcal, proteinG: activeProteinG, fatG: activeFatG },
+        { goal: selectedPatient.goal, dairyFree, vegetarian },
+      );
+
+      // Layer 4 — Validate immediately
+      const val = validatePlan(
+        dist.equivalents as Record<string, number>,
+        {
+          kcal:     targetKcal,
+          proteinG: activeProteinG,
+          fatG:     activeFatG,
+          carbsG:   activeCarbsG,
+        },
+        selectedPatient.weightKg,
+      );
+
+      // Layer 3 — AI generates reasoning text only (equivalents are already fixed)
       const result = await generateNutritionPlan({
-        sex: selectedPatient.sex,
-        age: selectedPatient.age ?? 30,
-        weightKg: selectedPatient.weightKg,
-        heightCm: selectedPatient.heightCm,
-        activityLevel: selectedPatient.activityLevel,
-        goal: selectedPatient.goal,
-        notes: selectedPatient.notes,
-        targetCalories: targetKcal,
-        targetProteinG: proteinG,
-        targetFatG: fatG,
-        targetCarbsG: carbsG,
-        allergies: selectedPatient.allergies?.length > 0 ? selectedPatient.allergies : undefined,
+        sex:             selectedPatient.sex,
+        age:             selectedPatient.age ?? 30,
+        weightKg:        selectedPatient.weightKg,
+        heightCm:        selectedPatient.heightCm,
+        activityLevel:   selectedPatient.activityLevel,
+        goal:            selectedPatient.goal,
+        notes:           selectedPatient.notes,
+        allergies:       selectedPatient.allergies?.length > 0 ? selectedPatient.allergies : undefined,
         foodPreferences: selectedPatient.foodPreferences || undefined,
-        recall24h: adaptFromRecall && recall24h.trim() ? recall24h.trim() : undefined,
+        recall24h:       adaptFromRecall && recall24h.trim() ? recall24h.trim() : undefined,
         adaptFromRecall: adaptFromRecall && !!recall24h.trim(),
+        targetCalories:  targetKcal,
+        targetProteinG:  activeProteinG,
+        targetFatG:      activeFatG,
+        targetCarbsG:    activeCarbsG,
+        bmr:             protocol.bmr,
+        tdee:            protocol.tdee,
+        proteinGperKg:   protocol.proteinGperKg,
+        formula:         protocol.formula,
+        equivalents: {
+          verduras:         dist.equivalents.verduras         ?? 0,
+          frutas:           dist.equivalents.frutas           ?? 0,
+          cerealesSinGrasa: dist.equivalents.cerealesSinGrasa ?? 0,
+          cerealesConGrasa: dist.equivalents.cerealesConGrasa ?? 0,
+          leguminosas:      dist.equivalents.leguminosas      ?? 0,
+          aoaMuyBajaGrasa:  dist.equivalents.aoaMuyBajaGrasa  ?? 0,
+          aoaBajaGrasa:     dist.equivalents.aoaBajaGrasa     ?? 0,
+          aoaMedGrasa:      dist.equivalents.aoaMedGrasa      ?? 0,
+          aoaAltaGrasa:     dist.equivalents.aoaAltaGrasa     ?? 0,
+          lecheDes:         dist.equivalents.lecheDes         ?? 0,
+          lecheSemi:        dist.equivalents.lecheSemi        ?? 0,
+          lecheEntera:      dist.equivalents.lecheEntera      ?? 0,
+          lecheConAzucar:   dist.equivalents.lecheConAzucar   ?? 0,
+          grasasSinProt:    dist.equivalents.grasasSinProt    ?? 0,
+          grasasConProt:    dist.equivalents.grasasConProt    ?? 0,
+          azucaresSinGrasa: dist.equivalents.azucaresSinGrasa ?? 0,
+          azucaresConGrasa: dist.equivalents.azucaresConGrasa ?? 0,
+        },
       });
-      setEquivalents(result.equivalents as Record<string, number>);
-      setReasoning(result.reasoning);
+
+      // State from engine (not from AI)
+      setEquivalents(dist.equivalents as Record<string, number>);
+      setValidation(val);
+      setReasoning(result.reasoning ?? "");
       if (!fromReview) setPlanTitle(`Plan Nutricional – ${selectedPatient.name}`);
       setStep("review");
     } catch (e: any) {
@@ -293,30 +367,26 @@ export default function AIPlanPage() {
   }
 
   async function handleSave() {
-    if (!selectedPatient) return;
+    if (!selectedPatient || !protocol) return;
     setSaving(true);
-    const totals = computeEquivTotals(equivalents);
-    const age = selectedPatient.age ?? 30;
-    const bmr = mifflinBMR(selectedPatient.weightKg, selectedPatient.heightCm, age, selectedPatient.sex);
-    const actFactor = ACTIVITY_FACTORS[selectedPatient.activityLevel] ?? 1.55;
-    const tdeeBase = Math.round(bmr * actFactor);
+    const totals = computeEquivalentTotals(equivalents);
 
     try {
       const id = await createPlan({
-        patientId: selectedPatient._id,
-        title: planTitle,
-        status: "draft",
-        targetCalories: totals.kcal,
-        targetProteinG: totals.p,
-        targetFatG: totals.l,
-        targetCarbsG: totals.hc,
-        targetProteinPct: totals.kcal > 0 ? Math.round((totals.p * 4 / totals.kcal) * 100) : 0,
-        targetFatPct: totals.kcal > 0 ? Math.round((totals.l * 9 / totals.kcal) * 100) : 0,
-        targetCarbsPct: totals.kcal > 0 ? Math.round((totals.hc * 4 / totals.kcal) * 100) : 0,
-        calculationMethod: "mifflin_ai",
-        calculationFactor: actFactor,
-        bmr: Math.round(bmr),
-        tdee: tdeeBase,
+        patientId:       selectedPatient._id,
+        title:           planTitle,
+        status:          "draft",
+        targetCalories:  totals.kcal,
+        targetProteinG:  totals.proteinG,
+        targetFatG:      totals.fatG,
+        targetCarbsG:    totals.carbsG,
+        targetProteinPct: totals.kcal > 0 ? Math.round((totals.proteinG * 4 / totals.kcal) * 100) : 0,
+        targetFatPct:    totals.kcal > 0 ? Math.round((totals.fatG * 9 / totals.kcal) * 100) : 0,
+        targetCarbsPct:  totals.kcal > 0 ? Math.round((totals.carbsG * 4 / totals.kcal) * 100) : 0,
+        calculationMethod: `${protocol.formula}_deterministic`,
+        calculationFactor: protocol.activityFactor,
+        bmr:             protocol.bmr,
+        tdee:            protocol.tdee,
         equivalentsPerDay: {
           verduras:         equivalents.verduras         ?? 0,
           frutas:           equivalents.frutas           ?? 0,
@@ -345,13 +415,14 @@ export default function AIPlanPage() {
     }
   }
 
-  const totals = computeEquivTotals(equivalents);
+  const totals = computeEquivalentTotals(equivalents);
 
+  // ── Step labels ─────────────────────────────────────────────────────────────
   const STEP_LABELS = [
-    { key: "select",  label: "1. Paciente" },
-    { key: "setup",   label: "2. Configurar" },
-    { key: "recall",  label: "3. Alimentación" },
-    { key: "review",  label: "4. Revisar" },
+    { key: "select", label: "1. Paciente" },
+    { key: "setup",  label: "2. Configurar" },
+    { key: "recall", label: "3. Alimentación" },
+    { key: "review", label: "4. Revisar" },
   ];
 
   return (
@@ -363,7 +434,7 @@ export default function AIPlanPage() {
           Plan con IA
         </h1>
         <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">
-          Selecciona un paciente y la IA generará su distribución de equivalentes SMAE automáticamente.
+          Cálculos clínicos deterministas. La IA solo redacta la justificación.
         </p>
       </div>
 
@@ -372,9 +443,9 @@ export default function AIPlanPage() {
         {STEP_LABELS.map(({ key, label }, i, arr) => {
           const stepOrder = ["select", "setup", "recall", "generating", "review"];
           const currentIdx = stepOrder.indexOf(step);
-          const thisIdx = stepOrder.indexOf(key);
-          const isDone = currentIdx > thisIdx;
-          const isCurrent = step === key || (step === "generating" && key === "recall");
+          const thisIdx    = stepOrder.indexOf(key);
+          const isDone     = currentIdx > thisIdx;
+          const isCurrent  = step === key || (step === "generating" && key === "recall");
           return (
             <div key={key} className="flex items-center gap-2">
               <span className={cn(
@@ -383,7 +454,7 @@ export default function AIPlanPage() {
                   ? "bg-[hsl(var(--primary))] text-white"
                   : isDone
                   ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
-                  : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
+                  : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]",
               )}>
                 {label}
               </span>
@@ -448,8 +519,9 @@ export default function AIPlanPage() {
       )}
 
       {/* ── Step 2: Setup ── */}
-      {step === "setup" && selectedPatient && (
+      {step === "setup" && selectedPatient && protocol && (
         <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-5">
+
           {/* Patient summary */}
           <div className="bg-[hsl(var(--muted))] rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div>
@@ -461,13 +533,34 @@ export default function AIPlanPage() {
               <p className="font-medium">{GOAL_LABELS[selectedPatient.goal] ?? selectedPatient.goal}</p>
             </div>
             <div>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">BMR (Mifflin)</p>
-              <p className="font-medium">{Math.round(bmr)} kcal</p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">TMB ({protocol.formula === "mifflin" ? "Mifflin" : "Harris-B."})</p>
+              <p className="font-medium">{protocol.bmr} kcal</p>
             </div>
             <div>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">TDEE estimado</p>
-              <p className="font-medium">{tdeeBase} kcal</p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">GET estimado</p>
+              <p className="font-medium">{protocol.tdee} kcal</p>
             </div>
+          </div>
+
+          {/* Protocol traceability */}
+          <div className="bg-[hsl(var(--accent))]/50 border border-[hsl(var(--border))] rounded-xl p-3 text-xs space-y-1 text-[hsl(var(--muted-foreground))]">
+            <p className="font-semibold text-[hsl(var(--foreground))] text-[11px] uppercase tracking-wide mb-1.5">
+              Cálculo energético
+            </p>
+            <p>
+              <span className="font-medium text-[hsl(var(--foreground))]">Fórmula:</span>{" "}
+              {protocol.formula === "mifflin" ? "Mifflin-St Jeor (1990)" : "Harris-Benedict revisada (1984)"}
+            </p>
+            <p>
+              <span className="font-medium text-[hsl(var(--foreground))]">TMB:</span> {protocol.bmr} kcal{" "}
+              × {protocol.activityFactor} ({ACTIVITY_LABELS[selectedPatient.activityLevel] ?? selectedPatient.activityLevel}){" "}
+              = <span className="font-medium text-[hsl(var(--foreground))]">{protocol.tdee} kcal GET</span>
+            </p>
+            <p>
+              <span className="font-medium text-[hsl(var(--foreground))]">Ajuste objetivo:</span>{" "}
+              {protocol.goalAdjustmentKcal >= 0 ? "+" : ""}{protocol.goalAdjustmentKcal} kcal
+              ({GOAL_LABELS[selectedPatient.goal] ?? selectedPatient.goal})
+            </p>
           </div>
 
           {/* Allergies / preferences reminder */}
@@ -499,7 +592,7 @@ export default function AIPlanPage() {
               {selectedPatient.adherenceRating && (
                 <span className={cn(
                   "text-xs px-2.5 py-0.5 rounded-full border font-medium",
-                  ADHERENCE_COLORS[selectedPatient.adherenceRating]
+                  ADHERENCE_COLORS[selectedPatient.adherenceRating],
                 )}>
                   {ADHERENCE_LABELS[selectedPatient.adherenceRating]}
                 </span>
@@ -514,101 +607,126 @@ export default function AIPlanPage() {
               <Input
                 type="number"
                 value={targetKcal}
-                onChange={(e) => setTargetKcal(Number(e.target.value) || tdeeBase)}
+                onChange={(e) => handleKcalChange(Number(e.target.value) || protocol.tdee)}
                 className="w-32"
               />
               <span className="text-xs text-[hsl(var(--muted-foreground))]">
-                TDEE {tdeeBase} kcal · ajuste {goalDelta >= 0 ? "+" : ""}{goalDelta} kcal
+                GET {protocol.tdee} kcal · ajuste {protocol.goalAdjustmentKcal >= 0 ? "+" : ""}{protocol.goalAdjustmentKcal} kcal
               </span>
             </div>
           </div>
 
-          {/* Macro distribution — all 3 editable */}
+          {/* Macro distribution — deterministic by default */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Distribución de macronutrimentos</Label>
-              <span className={cn(
-                "text-xs font-semibold px-2 py-0.5 rounded-full",
-                macroSum === 100
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              )}>
-                {macroSum}% {macroSum === 100 ? "✓" : "≠ 100%"}
-              </span>
+              <button
+                type="button"
+                onClick={() => setMacroOverride(!macroOverride)}
+                className="text-xs text-[hsl(var(--primary))] hover:underline"
+              >
+                {macroOverride ? "Usar valores calculados" : "Ajustar manualmente"}
+              </button>
             </div>
 
             {/* Visual bar */}
             <div className="flex h-2.5 rounded-full overflow-hidden gap-0.5">
-              <div className="bg-blue-400 transition-all" style={{ width: `${proteinPct}%` }} />
-              <div className="bg-yellow-400 transition-all" style={{ width: `${fatPct}%` }} />
-              <div className="bg-[hsl(var(--primary))] transition-all" style={{ width: `${carbsPct}%` }} />
+              <div className="bg-blue-400 transition-all" style={{ width: `${displayProteinPct}%` }} />
+              <div className="bg-yellow-400 transition-all" style={{ width: `${displayFatPct}%` }} />
+              <div className="bg-[hsl(var(--primary))] transition-all" style={{ width: `${displayCarbsPct}%` }} />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            {/* Macro values */}
+            <div className="grid grid-cols-3 gap-3 text-center">
               {/* Protein */}
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-blue-600">Proteínas</p>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setProtein(proteinPct - 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >−</button>
-                  <span className="flex-1 text-center text-sm font-semibold">{proteinPct}%</span>
-                  <button
-                    type="button"
-                    onClick={() => setProtein(proteinPct + 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >+</button>
-                </div>
-                <p className="text-xs text-center text-[hsl(var(--muted-foreground))]">
-                  {proteinG} g · {proteinGkg} g/kg
+              <div className="bg-[hsl(var(--muted))] rounded-xl p-3 space-y-0.5">
+                <p className="text-xs font-semibold text-blue-600">Proteínas</p>
+                {macroOverride ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <button type="button" onClick={() => setProtein(proteinPct - 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">−</button>
+                    <span className="text-sm font-semibold w-8">{proteinPct}%</span>
+                    <button type="button" onClick={() => setProtein(proteinPct + 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">+</button>
+                  </div>
+                ) : (
+                  <p className="text-sm font-bold">{displayProteinPct}%</p>
+                )}
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{activeProteinG}g · {proteinGkg} g/kg</p>
+                <p className={cn(
+                  "text-[10px] font-medium",
+                  displayProteinPct >= 10 && displayProteinPct <= 35 ? "text-green-600" : "text-red-600",
+                )}>
+                  AMDR 10–35% {displayProteinPct >= 10 && displayProteinPct <= 35 ? "✓" : "⚠"}
                 </p>
               </div>
 
               {/* Fat */}
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-yellow-600">Grasas</p>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setFat(fatPct - 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >−</button>
-                  <span className="flex-1 text-center text-sm font-semibold">{fatPct}%</span>
-                  <button
-                    type="button"
-                    onClick={() => setFat(fatPct + 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >+</button>
-                </div>
-                <p className="text-xs text-center text-[hsl(var(--muted-foreground))]">
-                  {fatG} g · {fatGkg} g/kg
+              <div className="bg-[hsl(var(--muted))] rounded-xl p-3 space-y-0.5">
+                <p className="text-xs font-semibold text-yellow-600">Grasas</p>
+                {macroOverride ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <button type="button" onClick={() => setFat(fatPct - 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">−</button>
+                    <span className="text-sm font-semibold w-8">{fatPct}%</span>
+                    <button type="button" onClick={() => setFat(fatPct + 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">+</button>
+                  </div>
+                ) : (
+                  <p className="text-sm font-bold">{displayFatPct}%</p>
+                )}
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{activeFatG}g</p>
+                <p className={cn(
+                  "text-[10px] font-medium",
+                  displayFatPct >= 20 && displayFatPct <= 35 ? "text-green-600" : "text-red-600",
+                )}>
+                  AMDR 20–35% {displayFatPct >= 20 && displayFatPct <= 35 ? "✓" : "⚠"}
                 </p>
               </div>
 
               {/* Carbs */}
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-[hsl(var(--primary))]">HC</p>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setCarbsManual(carbsPct - 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >−</button>
-                  <span className="flex-1 text-center text-sm font-semibold">{carbsPct}%</span>
-                  <button
-                    type="button"
-                    onClick={() => setCarbsManual(carbsPct + 5)}
-                    className="w-6 h-6 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] text-sm font-bold"
-                  >+</button>
-                </div>
-                <p className="text-xs text-center text-[hsl(var(--muted-foreground))]">
-                  {carbsG} g · {carbsGkg} g/kg
+              <div className="bg-[hsl(var(--muted))] rounded-xl p-3 space-y-0.5">
+                <p className="text-xs font-semibold text-[hsl(var(--primary))]">HC</p>
+                {macroOverride ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <button type="button" onClick={() => setCarbsManual(displayCarbsPct - 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">−</button>
+                    <span className="text-sm font-semibold w-8">{displayCarbsPct}%</span>
+                    <button type="button" onClick={() => setCarbsManual(displayCarbsPct + 5)}
+                      className="w-6 h-6 rounded bg-white/60 hover:bg-white font-bold text-sm">+</button>
+                  </div>
+                ) : (
+                  <p className="text-sm font-bold">{displayCarbsPct}%</p>
+                )}
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{activeCarbsG}g</p>
+                <p className={cn(
+                  "text-[10px] font-medium",
+                  displayCarbsPct >= 45 && displayCarbsPct <= 65 ? "text-green-600" : "text-amber-600",
+                )}>
+                  AMDR 45–65% {displayCarbsPct >= 45 && displayCarbsPct <= 65 ? "✓" : "⚠"}
                 </p>
               </div>
             </div>
+
+            {!macroOverride && (
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                Proteína calculada a <strong>{protocol.proteinGperKg.toFixed(1)} g/kg</strong> según objetivo.
+                Grasa al 30% kcal. HC completa el resto. Basado en AMDR (IOM, 2005).
+              </p>
+            )}
           </div>
+
+          {/* Clinical warnings from protocol */}
+          {protocol.warnings.length > 0 && (
+            <div className="flex flex-col gap-1.5 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-xs font-semibold text-amber-700 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" /> Avisos clínicos
+              </p>
+              {protocol.warnings.map((w, i) => (
+                <p key={i} className="text-xs text-amber-800">• {w}</p>
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-2 justify-between">
             <Button variant="outline" onClick={() => { setSelectedPatient(null); setStep("select"); }}>
@@ -630,7 +748,7 @@ export default function AIPlanPage() {
           <div>
             <h2 className="text-sm font-semibold">Alimentación habitual</h2>
             <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
-              Indica si la IA debe adaptar el plan a los hábitos del paciente o generar uno desde cero.
+              Opcional. La IA usará esto solo para redactar la justificación clínica — no altera los cálculos.
             </p>
           </div>
 
@@ -643,13 +761,13 @@ export default function AIPlanPage() {
                 "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-colors",
                 adaptFromRecall
                   ? "border-[hsl(var(--primary))] bg-[hsl(81,10%,96%)] text-[hsl(var(--primary))]"
-                  : "border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]"
+                  : "border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]",
               )}
             >
               <RefreshCw className="w-4 h-4" />
-              Adaptar dieta habitual
+              Incluir hábitos
               <span className="text-xs font-normal text-[hsl(var(--muted-foreground))]">
-                Mejora adherencia gradualmente
+                Para la justificación
               </span>
             </button>
             <button
@@ -659,18 +777,17 @@ export default function AIPlanPage() {
                 "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-colors",
                 !adaptFromRecall
                   ? "border-[hsl(var(--primary))] bg-[hsl(81,10%,96%)] text-[hsl(var(--primary))]"
-                  : "border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]"
+                  : "border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]",
               )}
             >
               <Sparkles className="w-4 h-4" />
-              Empezar desde cero
+              Omitir
               <span className="text-xs font-normal text-[hsl(var(--muted-foreground))]">
-                Plan nuevo sin restricciones
+                Sin hábitos previos
               </span>
             </button>
           </div>
 
-          {/* Recall estructurado */}
           {adaptFromRecall && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
@@ -684,42 +801,33 @@ export default function AIPlanPage() {
                 </Label>
                 {recallWasEdited && recall24h.trim() && (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="outline" size="sm"
                     onClick={handleSaveRecallToProfile}
                     disabled={savingRecall}
                     className="h-6 text-[10px] px-2 gap-1"
                   >
-                    {savingRecall
-                      ? <Loader2 className="w-3 h-3 animate-spin" />
-                      : null}
+                    {savingRecall && <Loader2 className="w-3 h-3 animate-spin" />}
                     Guardar en perfil
                   </Button>
                 )}
               </div>
 
-              {/* 5 meal fields */}
               {([
-                { key: "desayuno" as const, icon: Sun,      label: "Desayuno",     placeholder: "Ej: 2 huevos revueltos, 2 tortillas, café con leche",        accent: "#d97706", bg: "#fef9c3" },
-                { key: "colAm"    as const, icon: Coffee,   label: "Colación AM",  placeholder: "Ej: 1 fruta, yogurt, puñado de nueces",                       accent: "#16a34a", bg: "#dcfce7" },
-                { key: "comida"   as const, icon: Utensils, label: "Comida",       placeholder: "Ej: arroz, frijoles, pollo a la plancha, agua de sabor",      accent: "#2563eb", bg: "#dbeafe" },
-                { key: "colPm"    as const, icon: Apple,    label: "Colación PM",  placeholder: "Ej: galletas, fruta, agua de sabor",                          accent: "#ea580c", bg: "#ffedd5" },
-                { key: "cena"     as const, icon: Moon,     label: "Cena",         placeholder: "Ej: sopa de pasta, pan dulce, leche",                         accent: "#7c3aed", bg: "#ede9fe" },
+                { key: "desayuno" as const, icon: Sun,      label: "Desayuno",    placeholder: "Ej: 2 huevos, 2 tortillas, café con leche",        accent: "#d97706", bg: "#fef9c3" },
+                { key: "colAm"    as const, icon: Coffee,   label: "Colación AM", placeholder: "Ej: fruta, yogurt, nueces",                        accent: "#16a34a", bg: "#dcfce7" },
+                { key: "comida"   as const, icon: Utensils, label: "Comida",      placeholder: "Ej: arroz, frijoles, pollo a la plancha",           accent: "#2563eb", bg: "#dbeafe" },
+                { key: "colPm"    as const, icon: Apple,    label: "Colación PM", placeholder: "Ej: galletas, fruta",                              accent: "#ea580c", bg: "#ffedd5" },
+                { key: "cena"     as const, icon: Moon,     label: "Cena",        placeholder: "Ej: sopa, pan, leche",                             accent: "#7c3aed", bg: "#ede9fe" },
               ] as const).map(({ key, icon: Icon, label, placeholder, accent, bg }) => (
                 <div
                   key={key}
                   className="flex gap-2.5 items-start rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2.5 focus-within:border-[hsl(var(--primary))] transition-colors"
                 >
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ backgroundColor: bg }}
-                  >
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: bg }}>
                     <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-1">
-                      {label}
-                    </p>
+                    <p className="text-[11px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-1">{label}</p>
                     <textarea
                       rows={1}
                       value={recallFields[key]}
@@ -736,17 +844,12 @@ export default function AIPlanPage() {
                   </div>
                 </div>
               ))}
-
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                La IA reconocerá los patrones y ajustará el plan gradualmente hacia los objetivos nutricionales. Puedes dejar vacíos los tiempos que no apliquen.
-              </p>
             </div>
           )}
 
           {!adaptFromRecall && (
             <div className="bg-[hsl(var(--muted))] rounded-xl p-4 text-sm text-[hsl(var(--muted-foreground))]">
-              La IA generará un plan completamente nuevo basado en el objetivo calórico y los macros configurados,
-              sin considerar los hábitos alimentarios previos del paciente.
+              Los equivalentes SMAE se calcularán solo con el protocolo energético del paciente.
             </div>
           )}
 
@@ -757,7 +860,7 @@ export default function AIPlanPage() {
               className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Generar con IA
+              Generar plan
             </Button>
           </div>
         </div>
@@ -769,12 +872,10 @@ export default function AIPlanPage() {
           <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
             <Sparkles className="w-8 h-8 text-[hsl(var(--primary))] animate-pulse" />
           </div>
-          <p className="text-sm font-semibold">Generando plan con IA...</p>
+          <p className="text-sm font-semibold">Calculando plan...</p>
           <p className="text-xs text-[hsl(var(--muted-foreground))] text-center max-w-sm">
-            {adaptFromRecall && recall24h
-              ? "Analizando hábitos alimentarios y ajustando gradualmente hacia los objetivos nutricionales..."
-              : "Calculando la distribución óptima de equivalentes SMAE..."}
-            {" "}para <strong>{selectedPatient?.name}</strong>.
+            Motor determinista calculando equivalentes SMAE para{" "}
+            <strong>{selectedPatient?.name}</strong>. La IA redactará la justificación.
           </p>
           <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--muted-foreground))]" />
         </div>
@@ -783,11 +884,65 @@ export default function AIPlanPage() {
       {/* ── Step 4: Review ── */}
       {step === "review" && (
         <div className="bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] p-5 flex flex-col gap-4">
+
+          {/* Validation report */}
+          {validation && (
+            <div className={cn(
+              "rounded-xl p-3 border",
+              validation.status === "ok"
+                ? "bg-green-50 border-green-200"
+                : "bg-amber-50 border-amber-200",
+            )}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                {validation.status === "ok"
+                  ? <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                  : <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />}
+                <p className={cn(
+                  "text-xs font-semibold",
+                  validation.status === "ok" ? "text-green-700" : "text-amber-700",
+                )}>
+                  {validation.status === "ok" ? "Plan validado" : `${validation.issues.length} aviso${validation.issues.length > 1 ? "s" : ""} clínico${validation.issues.length > 1 ? "s" : ""}`}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-[hsl(var(--muted-foreground))]">
+                <span>
+                  <strong className={validation.status === "ok" ? "text-green-700" : "text-amber-700"}>
+                    {totals.kcal} kcal
+                  </strong>{" "}
+                  ({validation.kcalDeviationPct >= 0 ? "+" : ""}{validation.kcalDeviationPct}% vs objetivo)
+                </span>
+                <span>Proteína: {validation.actualProteinPct}%{" "}
+                  <span className={validation.proteinInAMDR ? "text-green-600" : "text-red-600"}>
+                    {validation.proteinInAMDR ? "✓" : "⚠"} AMDR
+                  </span>{" "}
+                  · {validation.actualProteinGperKg} g/kg
+                </span>
+                <span>Grasa: {validation.actualFatPct}%{" "}
+                  <span className={validation.fatInAMDR ? "text-green-600" : "text-red-600"}>
+                    {validation.fatInAMDR ? "✓" : "⚠"}
+                  </span>
+                </span>
+                <span>HC: {validation.actualCarbsPct}%{" "}
+                  <span className={validation.carbsInAMDR ? "text-green-600" : "text-amber-600"}>
+                    {validation.carbsInAMDR ? "✓" : "⚠"}
+                  </span>
+                </span>
+              </div>
+              {validation.issues.length > 0 && (
+                <div className="mt-1.5 flex flex-col gap-0.5">
+                  {validation.issues.map((issue, i) => (
+                    <p key={i} className="text-[11px] text-amber-800">• {issue}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* AI reasoning */}
           {reasoning && (
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
               <p className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3" /> Razonamiento clínico de la IA
+                <Info className="w-3 h-3" /> Justificación clínica
               </p>
               <p className="text-xs text-blue-800 leading-relaxed">{reasoning}</p>
             </div>
@@ -798,30 +953,26 @@ export default function AIPlanPage() {
             <div>
               <p className="text-sm font-bold">{totals.kcal}</p>
               <p className="text-[10px] text-[hsl(var(--muted-foreground))]">kcal total</p>
-              <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
-                ({Math.round((totals.kcal / targetKcal) * 100)}% objetivo)
-              </p>
+              {protocol && (
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                  (objetivo: {protocol.targetCalories})
+                </p>
+              )}
             </div>
             <div>
-              <p className="text-sm font-bold text-blue-600">{totals.p}g</p>
+              <p className="text-sm font-bold text-blue-600">{totals.proteinG}g</p>
               <p className="text-[10px] text-[hsl(var(--muted-foreground))]">proteína</p>
               <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
-                {selectedPatient ? (totals.p / selectedPatient.weightKg).toFixed(1) : "—"} g/kg
+                {selectedPatient ? (totals.proteinG / selectedPatient.weightKg).toFixed(1) : "—"} g/kg
               </p>
             </div>
             <div>
-              <p className="text-sm font-bold text-yellow-600">{totals.l}g</p>
+              <p className="text-sm font-bold text-yellow-600">{totals.fatG}g</p>
               <p className="text-[10px] text-[hsl(var(--muted-foreground))]">grasa</p>
-              <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
-                {selectedPatient ? (totals.l / selectedPatient.weightKg).toFixed(1) : "—"} g/kg
-              </p>
             </div>
             <div>
-              <p className="text-sm font-bold text-[hsl(var(--primary))]">{totals.hc}g</p>
+              <p className="text-sm font-bold text-[hsl(var(--primary))]">{totals.carbsG}g</p>
               <p className="text-[10px] text-[hsl(var(--muted-foreground))]">HC</p>
-              <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
-                {selectedPatient ? (totals.hc / selectedPatient.weightKg).toFixed(1) : "—"} g/kg
-              </p>
             </div>
           </div>
 
@@ -840,7 +991,7 @@ export default function AIPlanPage() {
               <tbody>
                 {SMAE_KEYS.filter((k) => (equivalents[k] ?? 0) > 0).map((key) => {
                   const n = equivalents[key] ?? 0;
-                  const g = SMAE_META[key];
+                  const g = SMAE_DATA[key];
                   return (
                     <tr key={key} className="border-t border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]/40">
                       <td className="px-3 py-2 font-medium">{g.label}</td>
@@ -852,11 +1003,11 @@ export default function AIPlanPage() {
                       <td className="px-2 py-2">
                         <div className="flex items-center justify-center gap-1">
                           <button
-                            onClick={() => setEquivalents({ ...equivalents, [key]: Math.max(0, n - 0.5) })}
+                            onClick={() => adjustEquivalent(key, -0.5)}
                             className="w-5 h-5 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] font-bold leading-none"
                           >−</button>
                           <button
-                            onClick={() => setEquivalents({ ...equivalents, [key]: n + 0.5 })}
+                            onClick={() => adjustEquivalent(key, 0.5)}
                             className="w-5 h-5 rounded bg-[hsl(var(--muted))] hover:bg-[hsl(var(--border))] font-bold leading-none"
                           >+</button>
                         </div>
@@ -878,11 +1029,10 @@ export default function AIPlanPage() {
           {adaptFromRecall && recallWasEdited && recall24h.trim() && (
             <div className="flex items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3">
               <p className="text-xs text-blue-800">
-                El recordatorio fue editado. ¿Actualizar el perfil del paciente con esta versión?
+                El recordatorio fue editado. ¿Actualizar el perfil del paciente?
               </p>
               <Button
-                size="sm"
-                variant="outline"
+                size="sm" variant="outline"
                 className="shrink-0 text-blue-700 border-blue-200 hover:bg-blue-100"
                 onClick={handleSaveRecallToProfile}
                 disabled={savingRecall}
@@ -904,7 +1054,7 @@ export default function AIPlanPage() {
                 {regenerating
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   : <RefreshCw className="w-3.5 h-3.5" />}
-                Regenerar
+                Recalcular
               </Button>
             </div>
             <Button

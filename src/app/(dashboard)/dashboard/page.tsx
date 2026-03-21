@@ -144,12 +144,10 @@ export default function DashboardPage() {
 
   const firstName = user?.firstName ?? user?.username ?? "nutrióloga";
 
-  // Derived insight flags
-  const hasAlerts = !!stats && (
-    stats.patientsWithoutPlan > 0 ||
-    stats.lowAdherence > 0 ||
-    stats.draftPlans > 0
-  );
+  // Clinical pending counts
+  const sinSeguimiento = stats?.patientsWithoutPlan ?? 0;
+  const porRevisar     = (stats?.lowAdherence ?? 0) + (stats?.draftPlans ?? 0);
+  const hasPending     = sinSeguimiento > 0 || porRevisar > 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 w-full">
@@ -191,70 +189,39 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── Clinical insights bar ── */}
-          <div className="px-6 py-3 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)] flex items-center gap-4 flex-wrap min-h-[42px]">
+          {/* ── Clinical status line ── */}
+          <div className="px-6 py-3 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)] flex items-center gap-3 min-h-[42px]">
             {isLoading ? (
-              <Skeleton className="h-3.5 w-56" />
-            ) : stats && stats.totalPatients === 0 ? (
+              <Skeleton className="h-3.5 w-48" />
+            ) : !stats || stats.totalPatients === 0 ? (
               <span className="text-xs text-[hsl(var(--muted-foreground))]">
                 Comienza registrando tu primer paciente
               </span>
-            ) : stats ? (
+            ) : hasPending ? (
               <>
-                {/* Alert chips — shown only when count > 0 */}
-                {stats.patientsWithoutPlan > 0 && (
+                {sinSeguimiento > 0 && (
                   <InsightChip
-                    count={stats.patientsWithoutPlan}
-                    label={stats.patientsWithoutPlan === 1 ? "sin plan" : "sin plan"}
+                    count={sinSeguimiento}
+                    label={sinSeguimiento === 1 ? "paciente sin seguimiento" : "pacientes sin seguimiento"}
                     dotColor="bg-[#974315]"
                     href="/patients"
                   />
                 )}
-                {stats.lowAdherence > 0 && (
+                {sinSeguimiento > 0 && porRevisar > 0 && (
+                  <span className="text-[hsl(var(--border))] select-none">·</span>
+                )}
+                {porRevisar > 0 && (
                   <InsightChip
-                    count={stats.lowAdherence}
-                    label={stats.lowAdherence === 1 ? "baja adherencia" : "baja adherencia"}
-                    dotColor="bg-[#974315]"
+                    count={porRevisar}
+                    label={porRevisar === 1 ? "por revisar" : "por revisar"}
+                    dotColor="bg-[#DAC297]"
                     href="/patients"
                   />
-                )}
-                {stats.draftPlans > 0 && (
-                  <InsightChip
-                    count={stats.draftPlans}
-                    label={stats.draftPlans === 1 ? "borrador" : "borradores"}
-                    dotColor="bg-[#5D9CBD]"
-                    href="/plans"
-                  />
-                )}
-                {stats.recentPatients > 0 && (
-                  <InsightChip
-                    count={stats.recentPatients}
-                    label={stats.recentPatients === 1 ? "nuevo esta semana" : "nuevos esta semana"}
-                    dotColor="bg-[#5D9CBD]"
-                    href="/patients"
-                  />
-                )}
-
-                {/* Context chip — always shown */}
-                {stats.activePatients > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#798C5E]" />
-                    <span className="text-xs font-semibold tabular-nums">{stats.activePatients}</span>
-                    <span className="text-xs text-[hsl(var(--muted-foreground))]">
-                      {stats.activePatients === 1 ? "activo" : "activos"}
-                    </span>
-                  </span>
-                )}
-
-                {/* All-clear state */}
-                {!hasAlerts && stats.activePatients > 0 && (
-                  <>
-                    <span className="text-[hsl(var(--border))]">·</span>
-                    <span className="text-xs text-[hsl(var(--muted-foreground))]">Todo en orden</span>
-                  </>
                 )}
               </>
-            ) : null}
+            ) : (
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">Sin pendientes hoy</span>
+            )}
           </div>
         </div>
 

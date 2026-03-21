@@ -29,15 +29,32 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
 
-// 8 semantic groups — subcategories share the same hue, differ only in label
-const VERDURAS   = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
-const FRUTAS     = "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
-const CEREALES   = "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
-const LEGUM      = "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300";
-const AOA        = "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300";
-const LECHE      = "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300";
-const GRASAS     = "bg-stone-100 text-stone-700 dark:bg-stone-800/50 dark:text-stone-300";
-const AZUCARES   = "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300";
+// ─── Badge colors — strictly on-brand palette ─────────────────────────────
+//
+// 4 hue families derived from brand colors:
+//   Blue   (#0C5E8A / #5D9CBD) → AOA, Leche   — clinical, professional
+//   Olive  (#798C5E / #B0C09A) → Verduras, Leguminosas — natural, plant-based
+//   Warm   (#974315 / #DAC297) → Frutas, Cereales — earthy, food
+//   Muted  (--muted token)     → Grasas, Azúcares  — neutral
+//
+// Light: bg at ~10-15% opacity, text uses dark hue variant (≥ 4.5:1 contrast)
+// Dark:  bg at ~15% opacity, text uses lighter hue variant
+
+// Blue family
+const AOA   = "bg-[#0C5E8A]/10 text-[#0C5E8A] dark:bg-[#0C5E8A]/15 dark:text-[#5D9CBD]";
+const LECHE = "bg-[#5D9CBD]/15 text-[#0C5E8A] dark:bg-[#5D9CBD]/15 dark:text-[#5D9CBD]";
+
+// Olive/sage family
+const VERDURAS = "bg-[#798C5E]/10 text-[#3d4e2c] dark:bg-[#798C5E]/15 dark:text-[#B0C09A]";
+const LEGUM    = "bg-[#B0C09A]/25 text-[#3d4e2c] dark:bg-[#B0C09A]/12 dark:text-[#B0C09A]";
+
+// Warm/earthy family
+const FRUTAS   = "bg-[#974315]/10 text-[#974315] dark:bg-[#974315]/15 dark:text-[#d4794b]";
+const CEREALES = "bg-[#DAC297]/30 text-[#7a5c28] dark:bg-[#DAC297]/12 dark:text-[#DAC297]";
+
+// Muted/neutral family
+const GRASAS   = "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]";
+const AZUCARES = "bg-[#974315]/8 text-[#6b3510] dark:bg-[#974315]/10 dark:text-[#c97744]";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Verduras:                             VERDURAS,

@@ -176,7 +176,7 @@ export default function PlansPage() {
           )}
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
             size="sm"
           >
             <Plus className="w-4 h-4 mr-1" />
@@ -251,7 +251,7 @@ export default function PlansPage() {
             <Button
               onClick={handleCreateFromTemplate}
               disabled={!templatePatientId || !selectedTemplateId || creatingFromTemplate}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
             >
               {creatingFromTemplate && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
               Crear plan
@@ -344,7 +344,7 @@ export default function PlansPage() {
             <Button
               onClick={handleCreate}
               disabled={!selectedPatientId || !title.trim() || macroSum !== 100 || submitting}
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
             >
               {submitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
               Crear plan
@@ -372,7 +372,7 @@ export default function PlansPage() {
             <Button asChild size="sm" variant="outline">
               <Link href="/patients">Agregar paciente</Link>
             </Button>
-            <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]">
+            <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]">
               <Link href="/ai">Generar plan con IA</Link>
             </Button>
           </div>
@@ -474,7 +474,7 @@ function PatientPlansSection({
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
             Sin planes para este paciente
           </p>
-          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] ml-auto">
+          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] ml-auto">
             <Link href="/ai">Generar con IA</Link>
           </Button>
         </div>

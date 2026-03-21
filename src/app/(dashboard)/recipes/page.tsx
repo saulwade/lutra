@@ -276,7 +276,7 @@ export default function RecipesPage() {
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
           >
             <Plus className="w-4 h-4 mr-1" />
             Nueva Receta
@@ -328,7 +328,7 @@ export default function RecipesPage() {
               <Button
                 size="sm"
                 onClick={() => setCreateDialogOpen(true)}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Crear receta
@@ -426,7 +426,7 @@ export default function RecipesPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Crear receta
@@ -894,7 +894,7 @@ function RecipeDetailDialog({
                     onClick={handleAddIngredient}
                     disabled={addingIngredient}
                     size="sm"
-                    className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] w-full"
+                    className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] w-full"
                   >
                     {addingIngredient && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                     Agregar ingrediente
@@ -1100,7 +1100,7 @@ function ImportRecipeDialog({
               <Button
                 onClick={handleParse}
                 disabled={!recipeName.trim() || !rawText.trim()}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 Detectar ingredientes →
               </Button>
@@ -1254,7 +1254,7 @@ function ImportRecipeDialog({
               <Button
                 onClick={handleCreate}
                 disabled={creating || matchedCount === 0}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {creating && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Crear receta con {matchedCount} ingrediente{matchedCount !== 1 ? "s" : ""}

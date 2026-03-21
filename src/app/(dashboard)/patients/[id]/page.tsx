@@ -379,7 +379,7 @@ export default function PatientDetailPage({
             <Pencil className="w-4 h-4 mr-1" />
             Editar
           </Button>
-          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]">
+          <Button asChild size="sm" className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]">
             <Link href={`/plans?patientId=${patient._id}`}>
               <Plus className="w-4 h-4 mr-1" />
               Nuevo Plan
@@ -623,7 +623,7 @@ export default function PatientDetailPage({
             <Button
               asChild
               size="sm"
-              className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+              className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
             >
               <Link href={`/plans?patientId=${patient._id}`}>
                 <Plus className="w-3.5 h-3.5 mr-1" />
@@ -649,7 +649,7 @@ export default function PatientDetailPage({
               <Button
                 asChild
                 size="sm"
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] mt-1"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] mt-1"
               >
                 <Link href={`/plans?patientId=${patient._id}`}>
                   <Plus className="w-4 h-4 mr-1" />
@@ -747,7 +747,7 @@ export default function PatientDetailPage({
                 size="sm"
                 onClick={handleAddMeasurement}
                 disabled={mSubmitting || !mForm.date}
-                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {mSubmitting && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
@@ -849,7 +849,7 @@ export default function PatientDetailPage({
                 size="sm"
                 onClick={handleAddConsultation}
                 disabled={cSubmitting || !cForm.date}
-                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="mt-4 bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {cSubmitting && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
@@ -1125,7 +1125,7 @@ export default function PatientDetailPage({
               <Button
                 onClick={handleEdit}
                 disabled={!editForm.name?.trim() || editSubmitting}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {editSubmitting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 Guardar cambios
@@ -1382,7 +1382,7 @@ function AIPlanDialog({ patient, open, onClose }: { patient: any; open: boolean;
               <Button variant="outline" onClick={onClose}>Cancelar</Button>
               <Button
                 onClick={handleGenerate}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] gap-1.5"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72] gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Generar con IA
@@ -1480,7 +1480,7 @@ function AIPlanDialog({ patient, open, onClose }: { patient: any; open: boolean;
               <Button
                 onClick={handleSave}
                 disabled={saving || !planTitle.trim()}
-                className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+                className="bg-[hsl(var(--cta))] text-white hover:bg-[#0a4d72]"
               >
                 {saving && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 Guardar plan

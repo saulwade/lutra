@@ -560,23 +560,12 @@ export default function PlanDetailPage({
             </div>
           )}
         </div>
-        <div className="flex gap-2 shrink-0">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleSaveAsTemplate}
-            disabled={savingTemplate}
-          >
-            {savingTemplate
-              ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-              : <LayoutTemplate className="w-4 h-4 mr-1.5" />}
-            Usar como plantilla
-          </Button>
+        <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
           <Button
             size="sm"
             onClick={handleDownloadPDF}
             disabled={downloadingPdf}
-            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)]"
+            className="bg-[hsl(var(--cta))] text-white hover:bg-[hsl(21,76%,28%)] flex-1 sm:flex-none"
           >
             {downloadingPdf
               ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -585,9 +574,21 @@ export default function PlanDetailPage({
           </Button>
           <Button
             size="sm"
+            variant="outline"
+            onClick={handleSaveAsTemplate}
+            disabled={savingTemplate}
+            className="flex-1 sm:flex-none"
+          >
+            {savingTemplate
+              ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+              : <LayoutTemplate className="w-4 h-4 mr-1.5" />}
+            Plantilla
+          </Button>
+          <Button
+            size="sm"
             variant="ghost"
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3"
           >
             <Trash2 className="w-4 h-4" />
           </Button>

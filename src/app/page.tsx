@@ -230,20 +230,20 @@ export default async function LandingPage() {
               {/* Copy */}
               <div className="flex-1 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
 
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.15] tracking-tight mb-5">
+                <h1 className="text-3xl sm:text-4xl lg:text-[3.25rem] font-extrabold leading-[1.2] sm:leading-[1.15] tracking-tight mb-4 sm:mb-5">
                   Deja de armar planes en Excel.{" "}
                   <span className="text-[hsl(81,10%,54%)]">Tu consulta merece herramientas reales.</span>
                 </h1>
 
-                <p className="text-lg sm:text-xl text-[hsl(215,16%,47%)] leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+                <p className="text-base sm:text-lg text-[hsl(215,16%,47%)] leading-relaxed mb-7 sm:mb-8 max-w-xl mx-auto lg:mx-0">
                   Lutra centraliza pacientes, planes alimenticios, base SMAE y recetas en un solo lugar. Crea planes profesionales en minutos, no en horas.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3">
                   <HeroAuthButtons />
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mt-5 text-sm text-[hsl(215,16%,47%)]">
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mt-4 sm:mt-5 text-sm text-[hsl(215,16%,47%)]">
                   <span className="flex items-center gap-1.5">
                     <Check className="w-4 h-4 text-[hsl(81,10%,54%)]" />
                     Sin tarjeta de crédito
@@ -686,7 +686,7 @@ export default async function LandingPage() {
             <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
               Únete a los nutriólogos que ya operan de forma más rápida, más ordenada y más profesional. Empieza hoy sin tarjeta de crédito.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 px-4 sm:px-0">
               <Button
                 asChild
                 size="lg"
@@ -700,8 +700,7 @@ export default async function LandingPage() {
               <Button
                 asChild
                 size="lg"
-                variant="ghost"
-                className="text-white hover:bg-white/10 h-12 px-8 text-base"
+                className="text-white bg-white/10 hover:bg-white/20 border border-white/30 h-12 px-8 text-base"
               >
                 <Link href="/login">Ya tengo cuenta</Link>
               </Button>

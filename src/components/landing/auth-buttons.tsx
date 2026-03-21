@@ -44,13 +44,13 @@ export function HeroAuthButtons() {
 
   return (
     <>
-      <Button asChild size="lg" className="bg-[hsl(81,10%,54%)] text-white hover:bg-[hsl(81,10%,44%)] h-12 px-8 text-base">
+      <Button asChild size="lg" className="bg-[hsl(81,10%,54%)] text-white hover:bg-[hsl(81,10%,44%)] h-12 px-8 text-base w-full sm:w-auto">
         <Link href="/signup">
           Comenzar gratis
           <ArrowRight className="w-4 h-4 ml-2" />
         </Link>
       </Button>
-      <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base">
+      <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base bg-white text-[hsl(222,47%,11%)] border-[hsl(214,32%,85%)] hover:bg-[hsl(214,32%,97%)] w-full sm:w-auto">
         <Link href="/login">Iniciar sesión</Link>
       </Button>
     </>

@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 px-4 py-4 md:px-6 md:py-6 overflow-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <AuthGuard>{children}</AuthGuard>
         </main>
       </div>

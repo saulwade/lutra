@@ -224,7 +224,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <StatCard label="Pacientes" icon={Users}        value={isLoading ? null : (patients?.length ?? 0)} color="text-[hsl(var(--primary))]"   bg="bg-[hsl(var(--accent))]" />
         <StatCard label="Planes"    icon={ClipboardList} value={isLoading ? null : (plans?.length ?? 0)}    color="text-[hsl(var(--terracotta))]" bg="bg-[hsl(var(--warm-cream))]" />
         <StatCard label="Recetas"   icon={ChefHat}       value={isLoading ? null : (recipes?.length ?? 0)}  color="text-[hsl(var(--slate-ui))]"   bg="bg-[hsl(var(--muted))]" />

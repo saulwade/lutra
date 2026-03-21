@@ -25,6 +25,10 @@ import {
   FileEdit,
   ListChecks,
   StickyNote,
+  Sun,
+  Coffee,
+  Moon,
+  Apple,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,6 +113,36 @@ const SMAE_META: Record<string, { label: string; kcal: number; p: number; l: num
   grasasConProt:    { label: "Grasas con proteína",   kcal: 70,  p: 3, l: 5, hc: 3  },
   azucaresSinGrasa: { label: "Azúcares sin grasa",    kcal: 40,  p: 0, l: 0, hc: 10 },
   azucaresConGrasa: { label: "Azúcares con grasa",    kcal: 85,  p: 0, l: 4, hc: 10 },
+};
+
+// Meal-time icon map
+const MEAL_ICONS: Record<string, { icon: any; accent: string; bg: string }> = {
+  "Desayuno":    { icon: Sun,      accent: "#d97706", bg: "#fef9c3" },
+  "Colación AM": { icon: Coffee,   accent: "#16a34a", bg: "#dcfce7" },
+  "Comida":      { icon: Utensils, accent: "#2563eb", bg: "#dbeafe" },
+  "Colación PM": { icon: Apple,    accent: "#ea580c", bg: "#ffedd5" },
+  "Cena":        { icon: Moon,     accent: "#7c3aed", bg: "#ede9fe" },
+};
+
+// SMAE group dot colors (matching calc/page.tsx SMAE colors)
+const GROUP_DOT: Record<string, string> = {
+  verduras:         "#4ade80",
+  frutas:           "#fb923c",
+  cerealesSinGrasa: "#facc15",
+  cerealesConGrasa: "#a16207",
+  leguminosas:      "#92400e",
+  aoaMuyBajaGrasa:  "#93c5fd",
+  aoaBajaGrasa:     "#3b82f6",
+  aoaMedGrasa:      "#1d4ed8",
+  aoaAltaGrasa:     "#1e3a8a",
+  lecheDes:         "#bae6fd",
+  lecheSemi:        "#38bdf8",
+  lecheEntera:      "#0369a1",
+  lecheConAzucar:   "#0891b2",
+  grasasSinProt:    "#fbbf24",
+  grasasConProt:    "#d97706",
+  azucaresSinGrasa: "#fb7185",
+  azucaresConGrasa: "#e11d48",
 };
 
 export default function PlanDetailPage({
@@ -550,10 +584,10 @@ export default function PlanDetailPage({
           <h2 className="text-sm font-semibold">Distribución Nutricional</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <NutrientBar label="Calorías" actual={Math.round(actualCalories)} target={plan.targetCalories} unit="kcal" pct={calPct} color="bg-orange-400" />
-          <NutrientBar label="Proteínas" actual={Math.round(actualProtein)} target={plan.targetProteinG} unit="g" pct={protPct} color="bg-blue-500" />
-          <NutrientBar label="Lípidos" actual={Math.round(actualFat)} target={plan.targetFatG} unit="g" pct={fatPct} color="bg-yellow-400" />
-          <NutrientBar label="Hidratos de C." actual={Math.round(actualCarbs)} target={plan.targetCarbsG} unit="g" pct={carbsPct} color="bg-[hsl(var(--primary))]" />
+          <NutrientBar label="Calorías" actual={Math.round(actualCalories)} target={plan.targetCalories} unit="kcal" pct={calPct} />
+          <NutrientBar label="Proteínas" actual={Math.round(actualProtein)} target={plan.targetProteinG} unit="g" pct={protPct} />
+          <NutrientBar label="Lípidos" actual={Math.round(actualFat)} target={plan.targetFatG} unit="g" pct={fatPct} />
+          <NutrientBar label="Hidratos de C." actual={Math.round(actualCarbs)} target={plan.targetCarbsG} unit="g" pct={carbsPct} />
         </div>
         <Separator className="my-4" />
         <div className="flex items-center gap-6 text-xs text-[hsl(var(--muted-foreground))]">
@@ -630,7 +664,12 @@ export default function PlanDetailPage({
                           dimmed ? "opacity-40" : ""
                         )}
                       >
-                        <td className="py-1.5 font-medium">{meta.label}</td>
+                        <td className="py-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: GROUP_DOT[key] ?? "#cbd5e1" }} />
+                            <span className="font-medium">{meta.label}</span>
+                          </div>
+                        </td>
                         <td className="py-1.5">
                           <div className="flex items-center justify-center gap-1">
                             <button
@@ -730,9 +769,20 @@ export default function PlanDetailPage({
                   <tr className="text-[hsl(var(--muted-foreground))] border-b border-[hsl(var(--border))]">
                     <th className="text-left pb-2 font-medium">Grupo</th>
                     <th className="text-center pb-2 font-medium">Total</th>
-                    {MEAL_NAMES_SHORT.map(n => (
-                      <th key={n} className="text-center pb-2 font-medium px-1">{n}</th>
-                    ))}
+                    {PRESET_MEALS.map((name, i) => {
+                      const mi = MEAL_ICONS[name];
+                      const Icon = mi?.icon ?? Utensils;
+                      return (
+                        <th key={name} className="text-center pb-2 font-medium px-1">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: mi?.bg ?? "#f1f5f4" }}>
+                              <Icon className="w-3 h-3" style={{ color: mi?.accent ?? "#8D957E" }} />
+                            </div>
+                            <span className="text-[10px]">{MEAL_NAMES_SHORT[i]}</span>
+                          </div>
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>
@@ -743,7 +793,12 @@ export default function PlanDetailPage({
                     const rowSum = vals.reduce((s, v) => s + v, 0);
                     return (
                       <tr key={grp.key} className="border-b border-[hsl(var(--border))]/50 last:border-0">
-                        <td className="py-1.5 font-medium">{grp.label}</td>
+                        <td className="py-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: GROUP_DOT[grp.smaeKeys[0]] ?? "#cbd5e1" }} />
+                            <span className="font-medium">{grp.label}</span>
+                          </div>
+                        </td>
                         <td className="py-1.5 text-center">
                           <span className={cn(
                             "font-semibold",
@@ -848,6 +903,7 @@ export default function PlanDetailPage({
               onAddRecipe={(recipe, servings) => handleAddRecipe(meal._id, recipe, servings)}
               onRemoveFood={handleRemoveFood}
               onDeleteMeal={() => handleDeleteMeal(meal._id)}
+              dayActualCalories={actualCalories}
             />
           ))}
 
@@ -916,27 +972,33 @@ function NutrientBar({
   target,
   unit,
   pct,
-  color,
 }: {
   label: string;
   actual: number;
   target: number;
   unit: string;
   pct: number;
-  color: string;
 }) {
+  const barColor = pct >= 90 && pct <= 110 ? "bg-green-500"
+    : pct > 110 ? "bg-red-400"
+    : pct >= 70 ? "bg-yellow-400"
+    : "bg-orange-300";
+  const pctColor = pct >= 90 && pct <= 110 ? "text-green-600"
+    : pct > 110 ? "text-red-600"
+    : "text-yellow-600";
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between text-xs">
         <span className="font-medium text-[hsl(var(--foreground))]">{label}</span>
-        <span className="text-[hsl(var(--muted-foreground))]">
-          {actual} / {target} {unit}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={cn("font-bold", pctColor)}>{Math.round(pct)}%</span>
+          <span className="text-[hsl(var(--muted-foreground))]">{actual}/{target} {unit}</span>
+        </div>
       </div>
       <div className="w-full h-2 rounded-full bg-[hsl(var(--muted))] overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all", color)}
-          style={{ width: `${pct}%` }}
+          className={cn("h-full rounded-full transition-all", barColor)}
+          style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
     </div>
@@ -951,6 +1013,7 @@ function MealSection({
   onAddRecipe,
   onRemoveFood,
   onDeleteMeal,
+  dayActualCalories,
 }: {
   meal: any;
   isAddingFood: boolean;
@@ -959,73 +1022,85 @@ function MealSection({
   onAddRecipe: (recipe: any, servings: number) => Promise<void>;
   onRemoveFood: (mealFoodId: string) => Promise<void>;
   onDeleteMeal: () => Promise<void>;
+  dayActualCalories?: number;
 }) {
-  const colorClass = MEAL_COLORS[meal.name] ?? "bg-gray-50 border-gray-200";
+  const mi = MEAL_ICONS[meal.name];
+  const Icon = mi?.icon ?? Utensils;
+  const accent = mi?.accent ?? "#8D957E";
+  const bg = mi?.bg ?? "#f1f5f4";
+
   const totalCal = meal.foods?.reduce((s: number, f: any) => s + (f.calories ?? 0), 0) ?? 0;
   const totalProt = meal.foods?.reduce((s: number, f: any) => s + (f.proteinG ?? 0), 0) ?? 0;
   const totalFat = meal.foods?.reduce((s: number, f: any) => s + (f.fatG ?? 0), 0) ?? 0;
   const totalCarbs = meal.foods?.reduce((s: number, f: any) => s + (f.carbsG ?? 0), 0) ?? 0;
+  const dayPct = dayActualCalories && dayActualCalories > 0 ? Math.round((totalCal / dayActualCalories) * 100) : null;
 
   return (
-    <div className={cn("rounded-xl border p-4", colorClass)}>
+    <div className="rounded-xl border border-[hsl(var(--border))] bg-white overflow-hidden">
       {/* Meal header */}
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-sm font-semibold">{meal.name}</h3>
-          {meal.time && (
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">{meal.time}</p>
-          )}
+      <div className="flex items-center gap-3 p-4">
+        {/* Meal-time icon */}
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: bg }}>
+          <Icon className="w-5 h-5" style={{ color: accent }} />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-right text-xs text-[hsl(var(--muted-foreground))]">
-            <p className="font-medium text-[hsl(var(--foreground))]">
-              {Math.round(totalCal)} kcal
-            </p>
-            <p>
-              P:{Math.round(totalProt)}g L:{Math.round(totalFat)}g HC:{Math.round(totalCarbs)}g
-            </p>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-semibold">{meal.name}</h3>
+              {meal.time && (
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">{meal.time}</p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-xl font-bold text-[hsl(var(--foreground))] leading-none">{Math.round(totalCal)}</p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                kcal{dayPct !== null ? ` · ${dayPct}% del día` : ""}
+              </p>
+            </div>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-7"
-            onClick={onToggleAddFood}
-          >
-            {isAddingFood ? <X className="w-3 h-3" /> : <><Plus className="w-3 h-3 mr-1" />Alimento</>}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
-            onClick={onDeleteMeal}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+
+          {/* Macro chips + actions */}
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">P {Math.round(totalProt)}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700">L {Math.round(totalFat)}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">HC {Math.round(totalCarbs)}g</span>
+            <div className="ml-auto flex items-center gap-1">
+              <Button size="sm" variant="outline" className="text-xs h-7" onClick={onToggleAddFood}>
+                {isAddingFood ? <X className="w-3 h-3" /> : <><Plus className="w-3 h-3 mr-1" />Alimento</>}
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={onDeleteMeal}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Add food panel */}
       {isAddingFood && (
-        <AddFoodPanel onAddFood={onAddFood} onAddRecipe={onAddRecipe} />
+        <div className="border-t border-[hsl(var(--border))] p-3">
+          <AddFoodPanel onAddFood={onAddFood} onAddRecipe={onAddRecipe} />
+        </div>
       )}
 
       {/* Foods table */}
       {meal.foods?.length === 0 && !isAddingFood ? (
-        <p className="text-xs text-[hsl(var(--muted-foreground))] text-center py-3">
-          Sin alimentos — haz clic en "+ Alimento" para agregar
-        </p>
+        <div className="border-t border-[hsl(var(--border))] py-6 text-center">
+          <p className="text-xs text-[hsl(var(--muted-foreground))] italic">Sin alimentos — usa "+ Alimento" para agregar</p>
+        </div>
       ) : meal.foods?.length > 0 ? (
-        <div className="overflow-x-auto mt-2">
+        <div className="border-t border-[hsl(var(--border))] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-[hsl(var(--muted-foreground))] border-b border-current/10">
-                <th className="text-left pb-1.5 font-medium">Alimento</th>
-                <th className="text-right pb-1.5 font-medium">Cant.</th>
-                <th className="text-right pb-1.5 font-medium">Kcal</th>
-                <th className="text-right pb-1.5 font-medium">P</th>
-                <th className="text-right pb-1.5 font-medium">L</th>
-                <th className="text-right pb-1.5 font-medium">HC</th>
-                <th className="w-8" />
+              <tr className="text-xs text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))]">
+                <th className="text-left px-4 py-2 font-medium">Alimento</th>
+                <th className="text-right px-2 py-2 font-medium">Cant.</th>
+                <th className="text-right px-2 py-2 font-medium font-bold">Kcal</th>
+                <th className="text-right px-2 py-2 font-medium text-blue-600">P</th>
+                <th className="text-right px-2 py-2 font-medium text-yellow-600">L</th>
+                <th className="text-right px-2 py-2 font-medium text-green-600">HC</th>
+                <th className="w-8 px-2 py-2" />
               </tr>
             </thead>
             <tbody>
@@ -1033,23 +1108,23 @@ function MealSection({
                 ?.slice()
                 .sort((a: any, b: any) => a.order - b.order)
                 .map((food: any) => (
-                  <tr key={food._id} className="border-b border-current/5 last:border-0 group">
-                    <td className="py-1.5">
-                      <p className="font-medium truncate max-w-[180px]">{food.name}</p>
+                  <tr key={food._id} className="border-t border-[hsl(var(--border))]/50 group hover:bg-[hsl(var(--muted))]/30 transition-colors">
+                    <td className="px-4 py-2">
+                      <p className="font-medium truncate max-w-[200px] text-sm">{food.name}</p>
                       {food.smaeCategory && (
-                        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                        <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[hsl(81,10%,92%)] text-[hsl(var(--primary))] mt-0.5">
                           {food.smaeCategory}
-                        </p>
+                        </span>
                       )}
                     </td>
-                    <td className="text-right text-[hsl(var(--muted-foreground))] text-xs py-1.5">
+                    <td className="text-right text-xs text-[hsl(var(--muted-foreground))] px-2 py-2">
                       {food.quantity} {food.unit}
                     </td>
-                    <td className="text-right py-1.5">{Math.round(food.calories)}</td>
-                    <td className="text-right text-xs py-1.5">{food.proteinG?.toFixed(1)}g</td>
-                    <td className="text-right text-xs py-1.5">{food.fatG?.toFixed(1)}g</td>
-                    <td className="text-right text-xs py-1.5">{food.carbsG?.toFixed(1)}g</td>
-                    <td className="py-1.5 pl-1">
+                    <td className="text-right px-2 py-2 font-bold text-[hsl(var(--foreground))]">{Math.round(food.calories)}</td>
+                    <td className="text-right text-xs px-2 py-2 text-blue-600 font-medium">{food.proteinG?.toFixed(1)}</td>
+                    <td className="text-right text-xs px-2 py-2 text-yellow-600 font-medium">{food.fatG?.toFixed(1)}</td>
+                    <td className="text-right text-xs px-2 py-2 text-green-600 font-medium">{food.carbsG?.toFixed(1)}</td>
+                    <td className="px-2 py-2">
                       <button
                         onClick={() => onRemoveFood(food._id)}
                         className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-opacity"

@@ -16,6 +16,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogClose,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -28,24 +29,34 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
 
+// 8 semantic groups — subcategories share the same hue, differ only in label
+const VERDURAS   = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
+const FRUTAS     = "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
+const CEREALES   = "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
+const LEGUM      = "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300";
+const AOA        = "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300";
+const LECHE      = "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300";
+const GRASAS     = "bg-stone-100 text-stone-700 dark:bg-stone-800/50 dark:text-stone-300";
+const AZUCARES   = "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300";
+
 const CATEGORY_COLORS: Record<string, string> = {
-  Verduras: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  Frutas: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  "Cereales y tubérculos sin grasa": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
-  "Cereales y tubérculos con grasa": "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  Leguminosas: "bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300",
-  "AOA muy baja grasa": "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  "AOA baja grasa": "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
-  "AOA moderada grasa": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-  "AOA alta grasa": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-  "Leche descremada": "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  "Leche semidescremada": "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-  "Leche entera": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300",
-  "Leche con azúcar": "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
-  "Aceites y grasas sin proteína": "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
-  "Aceites y grasas con proteína": "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-  "Azúcares sin grasa": "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
-  "Azúcares con grasa": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  Verduras:                             VERDURAS,
+  Frutas:                               FRUTAS,
+  "Cereales y tubérculos sin grasa":    CEREALES,
+  "Cereales y tubérculos con grasa":    CEREALES,
+  Leguminosas:                          LEGUM,
+  "AOA muy baja grasa":                 AOA,
+  "AOA baja grasa":                     AOA,
+  "AOA moderada grasa":                 AOA,
+  "AOA alta grasa":                     AOA,
+  "Leche descremada":                   LECHE,
+  "Leche semidescremada":               LECHE,
+  "Leche entera":                       LECHE,
+  "Leche con azúcar":                   LECHE,
+  "Aceites y grasas sin proteína":      GRASAS,
+  "Aceites y grasas con proteína":      GRASAS,
+  "Azúcares sin grasa":                 AZUCARES,
+  "Azúcares con grasa":                 AZUCARES,
 };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -251,7 +262,7 @@ function FoodDetailDialog({
 
   return (
     <Dialog open={!!food} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0 [&>button:last-child]:hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>{food.name}</DialogTitle>
         </DialogHeader>
@@ -266,6 +277,14 @@ function FoodDetailDialog({
             >
               {food.category}
             </span>
+            <DialogClose asChild>
+              <button
+                className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </DialogClose>
           </div>
           <h2 className="text-xl font-bold text-[hsl(var(--text-strong))] leading-tight mb-1">
             {food.name}

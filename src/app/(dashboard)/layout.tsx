@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <Topbar />
         {/* overflow-y-auto aquí, el padding va en el div interno
             para que iOS Safari respete el padding-right al hacer scroll */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto">
           <div className="px-4 py-4 md:px-6 md:py-6 pb-8 min-h-full">
             <AuthGuard>{children}</AuthGuard>
           </div>

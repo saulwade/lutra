@@ -324,6 +324,50 @@ export const getRecentPlans = query({
   },
 });
 
+// ─── DASHBOARD STATS ──────────────────────────────────────────────────────────
+// Computes actionable clinical metrics server-side in a single query.
+// Avoids sending full patient/plan records to the client just for counts.
+export const getDashboardStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const nutritionist = await getAuthenticatedNutritionist(ctx);
+
+    const [patients, plans] = await Promise.all([
+      ctx.db
+        .query("patients")
+        .withIndex("by_nutritionist", (q: any) => q.eq("nutritionistId", nutritionist._id))
+        .collect(),
+      ctx.db
+        .query("plans")
+        .withIndex("by_nutritionist", (q: any) => q.eq("nutritionistId", nutritionist._id))
+        .collect(),
+    ]);
+
+    // Which active patients already have at least one active plan?
+    const patientIdsWithActivePlan = new Set(
+      plans
+        .filter(p => p.status === "active" && p.patientId && !p.isTemplate)
+        .map(p => p.patientId as string)
+    );
+
+    const activePatients = patients.filter(p => p.isActive);
+    const now = Date.now();
+
+    return {
+      totalPatients:       patients.length,
+      activePatients:      activePatients.length,
+      // Patients flagged as low adherence — need follow-up
+      lowAdherence:        activePatients.filter(p => p.adherenceRating === "baja").length,
+      // Active patients with NO active plan assigned — need a plan
+      patientsWithoutPlan: activePatients.filter(p => !patientIdsWithActivePlan.has(p._id as string)).length,
+      // Draft plans that haven't been activated — pending work
+      draftPlans:          plans.filter(p => p.status === "draft" && !p.isTemplate).length,
+      // Patients registered in the last 7 days
+      recentPatients:      patients.filter(p => now - p.createdAt < 7 * 24 * 60 * 60 * 1000).length,
+    };
+  },
+});
+
 export const getTemplates = query({
   args: {},
   handler: async (ctx) => {

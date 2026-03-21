@@ -31,7 +31,6 @@ const GOAL_LABELS: Record<string, string> = {
 
 // ─── Icon system — strictly on brand palette ──────────────────────────────
 // bg: color/10-15 opacity  •  icon: solid brand color
-// Primary blue #0C5E8A, Secondary blue #5D9CBD, Olive #798C5E, Sand #DAC297
 
 // Alta prioridad — cards verticales grandes
 const PRIMARY_ACTIONS = [
@@ -101,19 +100,56 @@ function getTodayStr() {
   });
 }
 
+// ─── Clinical insight chip ────────────────────────────────────────────────────
+function InsightChip({
+  count,
+  label,
+  dotColor,
+  href,
+}: {
+  count: number;
+  label: string;
+  dotColor: string;
+  href: string;
+}) {
+  const inner = (
+    <>
+      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", dotColor)} />
+      <span className="text-xs font-semibold tabular-nums">{count}</span>
+      <span className="text-xs text-[hsl(var(--muted-foreground))]">{label}</span>
+    </>
+  );
+
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1.5 hover:opacity-70 transition-opacity"
+    >
+      {inner}
+    </Link>
+  );
+}
+
 export default function DashboardPage() {
   const { user }                                    = useUser();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const patients = useQuery(api.patients.getPatients,  isAuthenticated ? {} : "skip");
-  const recipes  = useQuery(api.recipes.getRecipes,   isAuthenticated ? {} : "skip");
-  const plans    = useQuery(api.plans.getRecentPlans, isAuthenticated ? { limit: 5 } : "skip");
+  const patients = useQuery(api.patients.getPatients,    isAuthenticated ? {} : "skip");
+  const plans    = useQuery(api.plans.getRecentPlans,   isAuthenticated ? { limit: 5 } : "skip");
+  const stats    = useQuery(api.plans.getDashboardStats, isAuthenticated ? {} : "skip");
 
-  const isLoading      = authLoading || patients === undefined;
+  const isLoading      = authLoading || patients === undefined || stats === undefined;
   const recentPatients = patients?.slice(-5).reverse() ?? [];
   const recentPlans    = plans ?? [];
   const isFirstTime    = !isLoading && (patients?.length ?? 0) === 0;
 
   const firstName = user?.firstName ?? user?.username ?? "nutrióloga";
+
+  // Derived insight flags
+  const hasAlerts = !!stats && (
+    stats.patientsWithoutPlan > 0 ||
+    stats.lowAdherence > 0 ||
+    stats.draftPlans > 0
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 w-full">
@@ -155,22 +191,70 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Stats bar */}
-          <div className="px-6 py-3 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)] flex items-center gap-1 text-sm">
+          {/* ── Clinical insights bar ── */}
+          <div className="px-6 py-3 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)] flex items-center gap-4 flex-wrap min-h-[42px]">
             {isLoading ? (
-              <Skeleton className="h-3.5 w-48" />
-            ) : (
+              <Skeleton className="h-3.5 w-56" />
+            ) : stats && stats.totalPatients === 0 ? (
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                Comienza registrando tu primer paciente
+              </span>
+            ) : stats ? (
               <>
-                <span className="font-semibold tabular-nums">{patients?.length ?? 0}</span>
-                <span className="text-[hsl(var(--muted-foreground))] ml-1 mr-3">pacientes</span>
-                <span className="text-[hsl(var(--border))]">·</span>
-                <span className="font-semibold tabular-nums ml-3">{plans?.length ?? 0}</span>
-                <span className="text-[hsl(var(--muted-foreground))] ml-1 mr-3">planes</span>
-                <span className="text-[hsl(var(--border))]">·</span>
-                <span className="font-semibold tabular-nums ml-3">{recipes?.length ?? 0}</span>
-                <span className="text-[hsl(var(--muted-foreground))] ml-1">recetas</span>
+                {/* Alert chips — shown only when count > 0 */}
+                {stats.patientsWithoutPlan > 0 && (
+                  <InsightChip
+                    count={stats.patientsWithoutPlan}
+                    label={stats.patientsWithoutPlan === 1 ? "sin plan" : "sin plan"}
+                    dotColor="bg-[#974315]"
+                    href="/patients"
+                  />
+                )}
+                {stats.lowAdherence > 0 && (
+                  <InsightChip
+                    count={stats.lowAdherence}
+                    label={stats.lowAdherence === 1 ? "baja adherencia" : "baja adherencia"}
+                    dotColor="bg-[#974315]"
+                    href="/patients"
+                  />
+                )}
+                {stats.draftPlans > 0 && (
+                  <InsightChip
+                    count={stats.draftPlans}
+                    label={stats.draftPlans === 1 ? "borrador" : "borradores"}
+                    dotColor="bg-[#5D9CBD]"
+                    href="/plans"
+                  />
+                )}
+                {stats.recentPatients > 0 && (
+                  <InsightChip
+                    count={stats.recentPatients}
+                    label={stats.recentPatients === 1 ? "nuevo esta semana" : "nuevos esta semana"}
+                    dotColor="bg-[#5D9CBD]"
+                    href="/patients"
+                  />
+                )}
+
+                {/* Context chip — always shown */}
+                {stats.activePatients > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#798C5E]" />
+                    <span className="text-xs font-semibold tabular-nums">{stats.activePatients}</span>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {stats.activePatients === 1 ? "activo" : "activos"}
+                    </span>
+                  </span>
+                )}
+
+                {/* All-clear state */}
+                {!hasAlerts && stats.activePatients > 0 && (
+                  <>
+                    <span className="text-[hsl(var(--border))]">·</span>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">Todo en orden</span>
+                  </>
+                )}
               </>
-            )}
+            ) : null}
           </div>
         </div>
 

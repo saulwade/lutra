@@ -34,7 +34,7 @@ export function Sidebar() {
 
       {/* Logo / Brand */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-[hsl(var(--sidebar-border))]">
-        <div className="w-9 h-9 rounded-xl bg-[hsl(var(--accent))] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
+        <div className="w-9 h-9 rounded-xl bg-[#f2ede2] flex items-center justify-center shrink-0 ring-1 ring-[hsl(var(--border))]">
           <img src="/lutra-logo.svg" alt="Lutra" className="w-6 h-6" />
         </div>
         <div className="flex flex-col leading-none">

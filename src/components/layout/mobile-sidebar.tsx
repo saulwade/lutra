@@ -66,7 +66,9 @@ export function MobileSidebar() {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[hsl(var(--sidebar-border))]">
           <div className="flex items-center gap-2.5">
-            <img src="/lutra-logo.svg" alt="Lutra" className="w-9 h-9 rounded-xl shrink-0" />
+            <div className="w-9 h-9 rounded-xl bg-[#f2ede2] flex items-center justify-center shrink-0">
+              <img src="/lutra-logo.svg" alt="Lutra" className="w-6 h-6" />
+            </div>
             <span className="text-lg font-bold tracking-tight">Lutra</span>
           </div>
           <button
